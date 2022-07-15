@@ -1,0 +1,12 @@
+{
+    "name": "com.seven.utility",
+    "version": "0.0.1",
+    "displayName": "Utility Package",
+    "description": "Math, Collision, Mesh Generation, GameObject Utility",
+    "unity": "2020.3",
+    "unityRelease": "12f1",
+    "author": {
+      "name": "Seven",
+      "email": "axelsevenet@gmail.com"
+    }
+  }
