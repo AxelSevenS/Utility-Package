@@ -10,8 +10,6 @@ namespace SevenGame.Utility {
     [System.Serializable]
     public class ValueData<T> {
 
-        protected const float HOLD_TIME = 0.2f;
-
         public T currentValue;
         public T lastValue;
         
@@ -42,6 +40,7 @@ namespace SevenGame.Utility {
         
         public override void SetVal(Vector3 updatedValue){
             base.SetVal(updatedValue);
+            
             lastZeroTime = updatedValue.magnitude == 0 ? Time.time : lastZeroTime;
             lastNonZeroTime = updatedValue.magnitude != 0 ? Time.time : lastNonZeroTime;
         }
@@ -59,20 +58,26 @@ namespace SevenGame.Utility {
     [System.Serializable]
     public class BoolData : ValueData<bool> {
 
+        protected const float HOLD_TIME = 0.2f;
+
         private float lastTrueTime;
         private float lastFalseTime;
         public float trueTimer => Time.time - lastFalseTime;
         public float falseTimer => Time.time - lastTrueTime;
-        public bool started => currentValue && !lastValue;
-        public bool stopped => !currentValue && lastValue;
+        public bool started;
+        public bool stopped;
         public bool tapped;
         public bool held;
 
         
         public override void SetVal(bool updatedValue){
             base.SetVal(updatedValue);
+            started = currentValue && !lastValue;
+            stopped = !currentValue && lastValue;
+
             tapped = stopped && trueTimer < HOLD_TIME;
             held = currentValue && trueTimer > HOLD_TIME;
+
             lastFalseTime = !updatedValue ? Time.time : lastFalseTime;
             lastTrueTime = updatedValue ? Time.time : lastTrueTime;
         }

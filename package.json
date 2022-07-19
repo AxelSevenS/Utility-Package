@@ -1,6 +1,6 @@
 {
     "name": "com.seven.utility",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "displayName": "Utility Package",
     "description": "Math, Collision, Mesh Generation, GameObject Utility",
     "unity": "2020.3",
