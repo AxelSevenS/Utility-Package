@@ -6,28 +6,20 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    
-    [System.Serializable]
-    public class ValueData<T> {
-
-        public T currentValue;
-        public T lastValue;
-        
-        public static implicit operator T(ValueData<T> data) => data.currentValue;
-        
-        public virtual void SetVal(T updatedValue){
-            lastValue = currentValue;
-            currentValue = updatedValue;
-        }
-    }
+    public interface ValueData<T> {
+        T currentValue { get; set; }
+        T lastValue { get; set; }
+        void SetVal(T value);
+    } 
 
     [System.Serializable]
-    public class VectorData : ValueData<Vector3> {
+    public struct VectorData : ValueData<Vector3> {
 
-        private float lastZeroTime;
-        private float lastNonZeroTime;
-        public float zeroTimer => Time.time - lastNonZeroTime;
-        public float nonZeroTimer => Time.time - lastZeroTime;
+        public Vector3 currentValue { get; set; }
+        public Vector3 lastValue { get; set; }
+        
+        private Timer zeroTimer;
+        private Timer nonZeroTimer;
 
         public float x => currentValue.x;
         public float y => currentValue.y;
@@ -35,20 +27,30 @@ namespace SevenGame.Utility {
         public float magnitude => currentValue.magnitude;
         public Vector3 normalized => currentValue.normalized;
 
+        public static implicit operator Vector3(VectorData data) => data.currentValue;
         public static Vector3 operator *(VectorData a, float b) => a.currentValue * b;
         public static Vector3 operator *(float a, VectorData b) => a * b.currentValue;
         
-        public override void SetVal(Vector3 updatedValue){
-            base.SetVal(updatedValue);
+        public void SetVal(Vector3 value){
+            lastValue = currentValue;
+            currentValue = value;
             
-            lastZeroTime = updatedValue.magnitude == 0 ? Time.time : lastZeroTime;
-            lastNonZeroTime = updatedValue.magnitude != 0 ? Time.time : lastNonZeroTime;
+            zeroTimer.SetTime( currentValue.magnitude == 0 ? Time.time : zeroTimer );
+            nonZeroTimer.SetTime( currentValue.magnitude != 0 ? Time.time : nonZeroTimer );
         }
     }
 
     [System.Serializable]
-    public class QuaternionData : ValueData<Quaternion> {
+    public struct QuaternionData : ValueData<Quaternion> {
+        public Quaternion currentValue { get; set; }
+        public Quaternion lastValue { get; set; }
 
+        public void SetVal(Quaternion value){
+            lastValue = currentValue;
+            currentValue = value;
+        }
+
+        public static implicit operator Quaternion(QuaternionData data) => data.currentValue;
         public static Vector3 operator *(QuaternionData a, Vector3 b) => a.currentValue * b;
         public static Vector3 operator *(QuaternionData a, VectorData b) => a.currentValue * b.currentValue;
         public static Quaternion operator *(QuaternionData a, QuaternionData b) => a.currentValue * b.currentValue;
@@ -56,30 +58,57 @@ namespace SevenGame.Utility {
     }
     
     [System.Serializable]
-    public class BoolData : ValueData<bool> {
+    public struct BoolData : ValueData<bool> {
+        public bool currentValue { get; set; }
+        public bool lastValue { get; set; }
 
-        protected const float HOLD_TIME = 0.2f;
-
-        private float lastTrueTime;
-        private float lastFalseTime;
-        public float trueTimer => Time.time - lastFalseTime;
-        public float falseTimer => Time.time - lastTrueTime;
+        public Timer trueTimer;
+        public Timer falseTimer;
         public bool started;
         public bool stopped;
-        public bool tapped;
-        public bool held;
 
-        
-        public override void SetVal(bool updatedValue){
-            base.SetVal(updatedValue);
+        public static implicit operator bool(BoolData data) => data.currentValue;
+        public void SetVal(bool value){
+            lastValue = currentValue;
+            currentValue = value;
+
             started = currentValue && !lastValue;
             stopped = !currentValue && lastValue;
 
-            tapped = stopped && trueTimer < HOLD_TIME;
-            held = currentValue && trueTimer > HOLD_TIME;
+            falseTimer.SetTime( !value ? Time.time : falseTimer );
+            trueTimer.SetTime( value ? Time.time : trueTimer );
+        }
+    }
 
-            lastFalseTime = !updatedValue ? Time.time : lastFalseTime;
-            lastTrueTime = updatedValue ? Time.time : lastTrueTime;
+    [System.Serializable]
+    public struct KeyInputData : ValueData<bool> {
+        public bool currentValue { get; set; }
+        public bool lastValue { get; set; }
+
+        private const float HOLD_TIME = 0.2f;
+
+        public Timer trueTimer;
+        public Timer falseTimer;
+        public bool started;
+        public bool stopped;
+
+        public bool tapped;
+        public bool held;
+
+        public static implicit operator bool(KeyInputData data) => data.currentValue;
+        
+        public void SetVal(bool value){
+            lastValue = currentValue;
+            currentValue = value;
+
+            started = currentValue && !lastValue;
+            stopped = !currentValue && lastValue;
+
+            tapped = stopped && trueTimer < HOLD_TIME; 
+            held = currentValue && trueTimer > HOLD_TIME; 
+
+            falseTimer.SetTime( !value ? Time.time : falseTimer );
+            trueTimer.SetTime( value ? Time.time : trueTimer );
         }
 
     }
