@@ -18,8 +18,8 @@ namespace SevenGame.Utility {
         public Vector3 currentValue { get; set; }
         public Vector3 lastValue { get; set; }
         
-        private Timer zeroTimer;
-        private Timer nonZeroTimer;
+        public Timer zeroTimer;
+        public Timer nonZeroTimer;
 
         public float x => currentValue.x;
         public float y => currentValue.y;
