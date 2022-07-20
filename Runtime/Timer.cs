@@ -10,7 +10,7 @@ namespace SevenGame.Utility {
         public float startTime;
         public float duration => Time.time - startTime;
 
-        public static implicit operator float(Timer timer) => timer.startTime;
+        public static implicit operator float(Timer timer) => timer.duration;
         public void SetTime(float time){
             startTime = time;
         }

@@ -35,8 +35,8 @@ namespace SevenGame.Utility {
             lastValue = currentValue;
             currentValue = value;
             
-            zeroTimer.SetTime( currentValue.magnitude == 0 ? Time.time : zeroTimer );
-            nonZeroTimer.SetTime( currentValue.magnitude != 0 ? Time.time : nonZeroTimer );
+            if ( currentValue.magnitude == 0 ) nonZeroTimer.SetTime(Time.time);
+            else zeroTimer.SetTime(Time.time);
         }
     }
 
@@ -75,8 +75,8 @@ namespace SevenGame.Utility {
             started = currentValue && !lastValue;
             stopped = !currentValue && lastValue;
 
-            falseTimer.SetTime( !value ? Time.time : falseTimer );
-            trueTimer.SetTime( value ? Time.time : trueTimer );
+            if (currentValue) falseTimer.SetTime(Time.time);
+            else trueTimer.SetTime(Time.time);
         }
     }
 
@@ -107,8 +107,8 @@ namespace SevenGame.Utility {
             tapped = stopped && trueTimer < HOLD_TIME; 
             held = currentValue && trueTimer > HOLD_TIME; 
 
-            falseTimer.SetTime( !value ? Time.time : falseTimer );
-            trueTimer.SetTime( value ? Time.time : trueTimer );
+            if (currentValue) falseTimer.SetTime(Time.time);
+            else trueTimer.SetTime(Time.time);
         }
 
     }
