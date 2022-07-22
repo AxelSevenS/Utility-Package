@@ -85,7 +85,7 @@ namespace SevenGame.Utility {
         public bool currentValue { get; set; }
         public bool lastValue { get; set; }
 
-        private const float HOLD_TIME = 0.2f;
+        private const float HOLD_TIME = 0.15f;
 
         public Timer trueTimer;
         public Timer falseTimer;
@@ -96,6 +96,12 @@ namespace SevenGame.Utility {
         public bool held;
 
         public static implicit operator bool(KeyInputData data) => data.currentValue;
+
+        public static bool SimultaneousTap(KeyInputData a, KeyInputData b, float time = HOLD_TIME) {
+            bool aTapped = a.trueTimer < time && a && b.started;
+            bool bTapped = b.trueTimer < time && b && a.started;
+            return aTapped || bTapped;
+        }
         
         public void SetVal(bool value){
             lastValue = currentValue;
