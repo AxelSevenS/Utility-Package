@@ -132,7 +132,15 @@ namespace SevenGame.Utility {
 
         public static Vector3 GetSize( this Collider collider ){
             if ( collider is CapsuleCollider capsule){
-                return new Vector3(capsule.radius, capsule.height, capsule.radius);
+                Vector3[] directionArray = new Vector3[] { Vector3.right, Vector3.up, Vector3.forward };
+                Vector3 result = new Vector3();
+                for (int i = 0; i < 3; i ++) {
+                    if (i == capsule.direction)
+                        result += directionArray[i] * capsule.height;
+                    else
+                        result += directionArray[i] * capsule.radius * 2;
+                }
+                return result;
             }else if ( collider is BoxCollider box){
                 return box.size;
             }else if ( collider is SphereCollider sphere){
