@@ -24,6 +24,7 @@ namespace SevenGame.Utility {
         public float x => currentValue.x;
         public float y => currentValue.y;
         public float z => currentValue.z;
+        public float sqrMagnitude => currentValue.sqrMagnitude;
         public float magnitude => currentValue.magnitude;
         public Vector3 normalized => currentValue.normalized;
 
