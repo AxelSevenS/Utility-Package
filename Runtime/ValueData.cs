@@ -7,16 +7,14 @@ using UnityEngine;
 namespace SevenGame.Utility {
 
     public interface ValueData<T> {
-        T currentValue { get; set; }
-        T lastValue { get; set; }
         void SetVal(T value);
     } 
 
     [System.Serializable]
     public struct Vector2Data : ValueData<Vector2> {
 
-        public Vector2 currentValue { get; set; }
-        public Vector2 lastValue { get; set; }
+        public Vector2 currentValue;
+        public Vector2 lastValue;
         
         public Timer zeroTimer;
         public Timer nonZeroTimer;
@@ -35,16 +33,16 @@ namespace SevenGame.Utility {
             lastValue = currentValue;
             currentValue = value;
             
-            if ( sqrMagnitude == 0 ) nonZeroTimer.SetTime(Time.time);
-            else zeroTimer.SetTime(Time.time);
+            if ( sqrMagnitude == 0 ) nonZeroTimer.Start();
+            else zeroTimer.Start();
         }
     }
 
     [System.Serializable]
     public struct Vector3Data : ValueData<Vector3> {
 
-        public Vector3 currentValue { get; set; }
-        public Vector3 lastValue { get; set; }
+        public Vector3 currentValue;
+        public Vector3 lastValue;
         
         public Timer zeroTimer;
         public Timer nonZeroTimer;
@@ -64,15 +62,15 @@ namespace SevenGame.Utility {
             lastValue = currentValue;
             currentValue = value;
             
-            if ( sqrMagnitude == 0 ) nonZeroTimer.SetTime(Time.time);
-            else zeroTimer.SetTime(Time.time);
+            if ( sqrMagnitude == 0 ) nonZeroTimer.Start();
+            else zeroTimer.Start();
         }
     }
 
     [System.Serializable]
     public struct QuaternionData : ValueData<Quaternion> {
-        public Quaternion currentValue { get; set; }
-        public Quaternion lastValue { get; set; }
+        public Quaternion currentValue;
+        public Quaternion lastValue;
 
         public void SetVal(Quaternion value){
             lastValue = currentValue;
@@ -88,8 +86,8 @@ namespace SevenGame.Utility {
     
     [System.Serializable]
     public struct BoolData : ValueData<bool> {
-        public bool currentValue { get; set; }
-        public bool lastValue { get; set; }
+        public bool currentValue;
+        public bool lastValue;
 
         public Timer trueTimer;
         public Timer falseTimer;
@@ -104,15 +102,15 @@ namespace SevenGame.Utility {
             started = currentValue && !lastValue;
             stopped = !currentValue && lastValue;
 
-            if (currentValue) falseTimer.SetTime(Time.time);
-            else trueTimer.SetTime(Time.time);
+            if (currentValue) falseTimer.Start();
+            else trueTimer.Start();
         }
     }
 
     [System.Serializable]
     public struct KeyInputData : ValueData<bool> {
-        public bool currentValue { get; set; }
-        public bool lastValue { get; set; }
+        public bool currentValue;
+        public bool lastValue;
 
         private const float HOLD_TIME = 0.15f;
 
@@ -142,8 +140,8 @@ namespace SevenGame.Utility {
             tapped = stopped && trueTimer < HOLD_TIME; 
             held = currentValue && trueTimer > HOLD_TIME; 
 
-            if (currentValue) falseTimer.SetTime(Time.time);
-            else trueTimer.SetTime(Time.time);
+            if (currentValue) falseTimer.Start();
+            else trueTimer.Start();
         }
 
     }
