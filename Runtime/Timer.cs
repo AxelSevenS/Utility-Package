@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
+    [System.Serializable]
     public struct Timer {
         public float startTime;
         public float duration => Time.time - startTime;
@@ -18,6 +19,7 @@ namespace SevenGame.Utility {
 
     }
 
+    [System.Serializable]
     public struct TimeUntil {
         public float stopTime;
         public bool isDone => Time.time >= stopTime;
