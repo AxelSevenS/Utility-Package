@@ -13,7 +13,35 @@ namespace SevenGame.Utility {
     } 
 
     [System.Serializable]
-    public struct VectorData : ValueData<Vector3> {
+    public struct Vector2Data : ValueData<Vector2> {
+
+        public Vector2 currentValue { get; set; }
+        public Vector2 lastValue { get; set; }
+        
+        public Timer zeroTimer;
+        public Timer nonZeroTimer;
+
+        public float x => currentValue.x;
+        public float y => currentValue.y;
+        public float sqrMagnitude => currentValue.sqrMagnitude;
+        public float magnitude => currentValue.magnitude;
+        public Vector2 normalized => currentValue.normalized;
+
+        public static implicit operator Vector2(Vector2Data data) => data.currentValue;
+        public static Vector2 operator *(Vector2Data a, float b) => a.currentValue * b;
+        public static Vector2 operator *(float a, Vector2Data b) => a * b.currentValue;
+        
+        public void SetVal(Vector2 value){
+            lastValue = currentValue;
+            currentValue = value;
+            
+            if ( sqrMagnitude == 0 ) nonZeroTimer.SetTime(Time.time);
+            else zeroTimer.SetTime(Time.time);
+        }
+    }
+
+    [System.Serializable]
+    public struct Vector3Data : ValueData<Vector3> {
 
         public Vector3 currentValue { get; set; }
         public Vector3 lastValue { get; set; }
@@ -28,15 +56,15 @@ namespace SevenGame.Utility {
         public float magnitude => currentValue.magnitude;
         public Vector3 normalized => currentValue.normalized;
 
-        public static implicit operator Vector3(VectorData data) => data.currentValue;
-        public static Vector3 operator *(VectorData a, float b) => a.currentValue * b;
-        public static Vector3 operator *(float a, VectorData b) => a * b.currentValue;
+        public static implicit operator Vector3(Vector3Data data) => data.currentValue;
+        public static Vector3 operator *(Vector3Data a, float b) => a.currentValue * b;
+        public static Vector3 operator *(float a, Vector3Data b) => a * b.currentValue;
         
         public void SetVal(Vector3 value){
             lastValue = currentValue;
             currentValue = value;
             
-            if ( currentValue.magnitude == 0 ) nonZeroTimer.SetTime(Time.time);
+            if ( sqrMagnitude == 0 ) nonZeroTimer.SetTime(Time.time);
             else zeroTimer.SetTime(Time.time);
         }
     }
@@ -53,7 +81,7 @@ namespace SevenGame.Utility {
 
         public static implicit operator Quaternion(QuaternionData data) => data.currentValue;
         public static Vector3 operator *(QuaternionData a, Vector3 b) => a.currentValue * b;
-        public static Vector3 operator *(QuaternionData a, VectorData b) => a.currentValue * b.currentValue;
+        public static Vector3 operator *(QuaternionData a, Vector3Data b) => a.currentValue * b.currentValue;
         public static Quaternion operator *(QuaternionData a, QuaternionData b) => a.currentValue * b.currentValue;
         
     }
