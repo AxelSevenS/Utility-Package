@@ -71,6 +71,11 @@ namespace SevenGame.Utility {
     public struct QuaternionData : ValueData<Quaternion> {
         public Quaternion currentValue;
         public Quaternion lastValue;
+        
+        public float x => currentValue.x;
+        public float y => currentValue.y;
+        public float z => currentValue.z;
+        public float w => currentValue.w;
 
         public void SetVal(Quaternion value){
             lastValue = currentValue;

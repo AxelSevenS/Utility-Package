@@ -58,19 +58,9 @@ namespace SevenGame.Utility.Editor {
         public override void OnInspectorGUI(){
             /* DrawDefaultInspector(); */
 
+		    EditorGUI.BeginChangeCheck();
+
             EditorGUILayout.PropertyField( propSplineCurve, new GUIContent("Spline") );
-            // GUILayout.Label( "Spline Control Points", EditorStyles.boldLabel );
-            // using ( new GUILayout.HorizontalScope( EditorStyles.helpBox ) ){
-            //     EditorGUIUtility.labelWidth = 100;
-            //     using ( new GUILayout.VerticalScope() ){ 
-            //         EditorGUILayout.PropertyField( propControlPoint1, new GUIContent("Control Point 1") );
-            //         EditorGUILayout.PropertyField( propHandle1, new GUIContent("Handle 1") );
-            //     }
-            //     using ( new GUILayout.VerticalScope() ){
-            //         EditorGUILayout.PropertyField( propControlPoint2, new GUIContent("Control Point 2") );
-            //         EditorGUILayout.PropertyField( propHandle2, new GUIContent("Handle 2") );
-            //     }
-            // }
 
             GUILayout.Space( 15 );
 
@@ -116,7 +106,15 @@ namespace SevenGame.Utility.Editor {
                 }
             }
 
-            so.ApplyModifiedProperties();
+            if ( EditorGUI.EndChangeCheck() ){
+
+                Undo.RecordObject( target, "Edited Spline Values" ); 
+
+                so.ApplyModifiedProperties();
+
+                targetSpline.UpdateOtherSegments();
+
+            }
         }
 
         public void OnSceneGUI(){
@@ -169,7 +167,7 @@ namespace SevenGame.Utility.Editor {
             Handles.DrawBezier( transformedControlPoint1.position, transformedControlPoint2.position, transformedHandle1.position, transformedHandle2.position, Color.white, EditorGUIUtility.whiteTexture, 1f );
 
             for (int i = 0; i < scr.ringCount; i++){
-                OrientedPoint pointAlongTessel = scr.GetBezier( (float)i/(float)scr.ringCount );
+                OrientedPoint pointAlongTessel = scr.GetBezier( (float)i/((float)scr.ringCount - 1) );
                 // pointAlongTessel.position = scr.transform.TransformPoint(pointAlongTessel.position);
                 // Vector3 velocityAlongTessel = GetVelocity( (float)i/(float)ringCount );
                 // Vector3 accelerationAlongTessel = GetAcceleration( (float)i/(float)ringCount );
