@@ -27,7 +27,9 @@ namespace SevenGame.Utility.Editor {
         private SerializedProperty propCount;
         private SerializedProperty propScale;
         
-        void OnEnable(){
+        private void OnEnable(){
+            Undo.undoRedoPerformed += OnUndoRedo;
+
             so = serializedObject;
             propSplineCurve = so.FindProperty( "splineCurve" );
             propControlPoint1 = propSplineCurve.FindPropertyRelative( "controlPoint1" );
@@ -43,6 +45,14 @@ namespace SevenGame.Utility.Editor {
             propScale = so.FindProperty( "scale" );
 
             targetSpline = (Spline)target;
+        }
+
+        private void OnDisable(){
+            Undo.undoRedoPerformed -= OnUndoRedo;
+        }
+
+        private void OnUndoRedo(){
+            targetSpline.UpdateOtherSegments();
         }
         
         public override void OnInspectorGUI(){
