@@ -28,6 +28,10 @@ namespace SevenGame.Utility {
             return result.ToString();
         }
 
+        public static string[] UppercaseSplit(this string t){
+            return Regex.Split(t, @"(?<!^)(?=[A-Z])");
+        }
+
         public static T SafeDestroy<T>(T obj) where T : Object{
             if (Application.isEditor)
                 Object.DestroyImmediate(obj);
