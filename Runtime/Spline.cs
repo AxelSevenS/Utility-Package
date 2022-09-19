@@ -7,38 +7,21 @@ namespace SevenGame.Utility {
     
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
+    [DisallowMultipleComponent]
     public class Spline : MonoBehaviour {
 
-        private Mesh mesh;
+        private const int LENGTH_PRECISION = 100;
 
+
+
+        private Mesh mesh;
         private MeshFilter _meshFilter;
-        public MeshFilter meshFilter {
-            get {
-                if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
-                return _meshFilter;
-            }
-        }
         private MeshCollider _meshCollider;
-        public MeshCollider meshCollider {
-            get {
-                if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
-                return _meshCollider;
-            }
-        }
+        
+        public BezierCubic splineCurve;
         public Spline prevSegment, nextSegment;
 
-        public ref OrientedPoint controlPoint1 => ref splineCurve.controlPoint1;
-        public ref OrientedPoint controlPoint2 => ref splineCurve.controlPoint2;
-        public ref OrientedPoint handle1 => ref splineCurve.handle1;
-        public ref OrientedPoint handle2 => ref splineCurve.handle2;
-
-        public OrientedPoint TransformPoint(OrientedPoint point) => transform.TransformPoint(point);
-        public OrientedPoint InverseTransformPoint(OrientedPoint point) => transform.InverseTransformPoint(point);
-
-        public BezierCubic splineCurve;
-
-        public OrientedPoint GetBezier(float tVal) => TransformPoint(splineCurve.GetPoint(tVal));
-
+        
         public RepeatableMesh mesh2D;
         [Range(3, 128)]
         public int ringCount = 4;
@@ -46,15 +29,35 @@ namespace SevenGame.Utility {
 
 
 
-        private void Awake() {
-            // UpdateMesh();
+        public MeshFilter meshFilter {
+            get {
+                if (_meshFilter == null) 
+                    _meshFilter = GetComponent<MeshFilter>();
+                return _meshFilter;
+            }
         }
+        public MeshCollider meshCollider {
+            get {
+                if (_meshCollider == null) 
+                    _meshCollider = GetComponent<MeshCollider>();
+                return _meshCollider;
+            }
+        }
+        
+        public float length => splineCurve.length;
+        public float[] arcLengths => splineCurve.arcLengths;
 
-        private void Reset(){
-            splineCurve = new BezierCubic();
-            splineCurve.Reset();
-            Awake();
-        }
+        public ref OrientedPoint controlPoint1 => ref splineCurve.controlPoint1;
+        public ref OrientedPoint controlPoint2 => ref splineCurve.controlPoint2;
+        public ref OrientedPoint handle1 => ref splineCurve.handle1;
+        public ref OrientedPoint handle2 => ref splineCurve.handle2;
+
+
+
+        public OrientedPoint TransformPoint(OrientedPoint point) => transform.TransformPoint(point);
+        public OrientedPoint InverseTransformPoint(OrientedPoint point) => transform.InverseTransformPoint(point);
+
+        public OrientedPoint GetBezier(float tVal) => TransformPoint(splineCurve.GetPoint(tVal));
 
         public void UpdateMesh(){
 
@@ -123,6 +126,8 @@ namespace SevenGame.Utility {
 
             meshFilter.sharedMesh = mesh;
             meshCollider.sharedMesh = mesh;
+
+            splineCurve.UpdateLength();
         }
 
         public void UpdateOtherSegments(){
@@ -173,9 +178,12 @@ namespace SevenGame.Utility {
             prevSegment = null;
         }
 
-        // private void OnValidate(){
-        //     UpdateOtherSegments();
-        // }
+
+
+        private void Reset(){
+            splineCurve = new BezierCubic();
+            splineCurve.Reset();
+        }
 
     }
 }

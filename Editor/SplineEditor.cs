@@ -19,6 +19,9 @@ namespace SevenGame.Utility.Editor {
         private SerializedProperty propControlPoint2;
         private SerializedProperty propHandle1;
         private SerializedProperty propHandle2;
+
+        private SerializedProperty propLength;
+        private SerializedProperty propArcLengths;
         
         private SerializedProperty propNextSegment;
         private SerializedProperty propPrevSegment;
@@ -26,30 +29,8 @@ namespace SevenGame.Utility.Editor {
         private SerializedProperty propMesh2D;
         private SerializedProperty propCount;
         private SerializedProperty propScale;
-        
-        private void OnEnable(){
-            Undo.undoRedoPerformed += OnUndoRedo;
 
-            so = serializedObject;
-            propSplineCurve = so.FindProperty( "splineCurve" );
-            propControlPoint1 = propSplineCurve.FindPropertyRelative( "controlPoint1" );
-            propControlPoint2 = propSplineCurve.FindPropertyRelative( "controlPoint2" ); 
-            propHandle1 = propSplineCurve.FindPropertyRelative( "handle1" );
-            propHandle2 = propSplineCurve.FindPropertyRelative( "handle2" );
 
-            propNextSegment = so.FindProperty( "nextSegment" );
-            propPrevSegment = so.FindProperty( "prevSegment" );
-
-            propMesh2D = so.FindProperty( "mesh2D" );
-            propCount = so.FindProperty( "ringCount" );
-            propScale = so.FindProperty( "scale" );
-
-            targetSpline = (Spline)target;
-        }
-
-        private void OnDisable(){
-            Undo.undoRedoPerformed -= OnUndoRedo;
-        }
 
         private void OnUndoRedo(){
             targetSpline.UpdateOtherSegments();
@@ -193,6 +174,35 @@ namespace SevenGame.Utility.Editor {
                 scr.transform.hasChanged = false; 
                 scr.UpdateOtherSegments();
             }
+        }
+
+        
+        
+        private void OnEnable(){
+            Undo.undoRedoPerformed += OnUndoRedo;
+
+            so = serializedObject;
+            propSplineCurve = so.FindProperty( "splineCurve" );
+            propControlPoint1 = propSplineCurve.FindPropertyRelative( "controlPoint1" );
+            propControlPoint2 = propSplineCurve.FindPropertyRelative( "controlPoint2" ); 
+            propHandle1 = propSplineCurve.FindPropertyRelative( "handle1" );
+            propHandle2 = propSplineCurve.FindPropertyRelative( "handle2" );
+
+            propLength = propSplineCurve.FindPropertyRelative( "_length" );
+            propArcLengths = propSplineCurve.FindPropertyRelative( "_arcLengths" );
+
+            propNextSegment = so.FindProperty( "nextSegment" );
+            propPrevSegment = so.FindProperty( "prevSegment" );
+
+            propMesh2D = so.FindProperty( "mesh2D" );
+            propCount = so.FindProperty( "ringCount" );
+            propScale = so.FindProperty( "scale" );
+
+            targetSpline = (Spline)target;
+        }
+
+        private void OnDisable(){
+            Undo.undoRedoPerformed -= OnUndoRedo;
         }
     }
 }

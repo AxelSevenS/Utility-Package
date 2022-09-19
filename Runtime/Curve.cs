@@ -18,6 +18,8 @@ namespace SevenGame.Utility {
         public OrientedPoint controlPoint2;
         public OrientedPoint handle;
 
+
+
         public BezierQuadratic(){
             controlPoint1 = new OrientedPoint();
             controlPoint2 = new OrientedPoint();
@@ -58,6 +60,8 @@ namespace SevenGame.Utility {
             return new OrientedPoint( c, rotation );
         }
 
+
+
         public override void Reset(){
             controlPoint1 = new OrientedPoint();
             controlPoint2 = new OrientedPoint(Vector3.forward * 50f);
@@ -67,12 +71,46 @@ namespace SevenGame.Utility {
     }
 
     [System.Serializable]
-    public class BezierCubic : Curve{
+    public class BezierCubic : Curve {
+
+
+        private const int LENGTH_PRECISION = 100;
+
+
+
+        [SerializeField] private float _length;
+        [SerializeField] private float[] _arcLengths;
 
         public OrientedPoint controlPoint1;
         public OrientedPoint controlPoint2;
         public OrientedPoint handle1;
         public OrientedPoint handle2;
+
+
+
+        public float length {
+            get {
+                if (_length == 0f)
+                    UpdateLength(LENGTH_PRECISION);
+                return _length;
+            }
+            private set {
+                _length = value;
+            }
+        }
+
+        public float[] arcLengths {
+            get {
+                if (_arcLengths == null)
+                    UpdateLength(LENGTH_PRECISION);
+                return _arcLengths;
+            }
+            private set {
+                _arcLengths = value;
+            }
+        }
+
+
 
         public BezierCubic(){
             controlPoint1 = new OrientedPoint();
@@ -99,6 +137,8 @@ namespace SevenGame.Utility {
             handle2 = new OrientedPoint(h2Pos);
         }
 
+
+
         public override void Move(Vector3 direction){
             controlPoint1.position += direction;
             controlPoint2.position += direction;
@@ -120,6 +160,25 @@ namespace SevenGame.Utility {
             Quaternion rotation = tForward == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation( tForward, tUp);
 
             return new OrientedPoint( f, rotation );
+        }
+
+        public void UpdateLength() => UpdateLength(LENGTH_PRECISION);
+
+        private void UpdateLength(int precision) {
+            _arcLengths = new float[precision + 1];
+            _arcLengths[0] = 0;
+
+            Vector3 lastPoint = GetPoint(0f).position;
+            _length = 0;
+
+            for (int i = 0; i < precision + 1; i++) {
+                Vector3 currentPoint = GetPoint((float)i / precision).position;
+
+                _length += Vector3.Distance(lastPoint, currentPoint);
+                _arcLengths[i] = _length;
+
+                lastPoint = currentPoint;
+            }
         }
 
         // public Vector3 GetVelocity(float t){
@@ -147,6 +206,8 @@ namespace SevenGame.Utility {
 
         //     return ( Vector3.Dot() );
         // }
+
+        
 
         public override void Reset(){
             controlPoint1 = new OrientedPoint();
