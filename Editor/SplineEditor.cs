@@ -22,6 +22,9 @@ namespace SevenGame.Utility.Editor {
 
         private SerializedProperty propLength;
         private SerializedProperty propArcLengths;
+
+        private SerializedProperty propStoppingPointCheck;
+        private SerializedProperty propStoppingPoint;
         
         private SerializedProperty propNextSegment;
         private SerializedProperty propPrevSegment;
@@ -30,6 +33,9 @@ namespace SevenGame.Utility.Editor {
         private SerializedProperty propCount;
         private SerializedProperty propScale;
 
+
+
+        private SelectedHandle currentlySelectedHandle;
 
 
         private void OnUndoRedo(){
@@ -73,6 +79,13 @@ namespace SevenGame.Utility.Editor {
                     }
                 }
             }
+            
+            GUILayout.Space( 15 );
+            
+            EditorGUILayout.PropertyField( propStoppingPointCheck );
+            if ( propStoppingPointCheck.boolValue ) {
+                EditorGUILayout.PropertyField( propStoppingPoint );
+            }
 
             GUILayout.Space( 15 );
 
@@ -99,29 +112,67 @@ namespace SevenGame.Utility.Editor {
         }
 
         public void OnSceneGUI(){
-            
-		    EditorGUI.BeginChangeCheck();
-
-            OrientedPoint newControlPoint1 = targetSpline.TransformPoint(targetSpline.controlPoint1);
-            OrientedPoint newControlPoint2 = targetSpline.TransformPoint(targetSpline.controlPoint2);
-            OrientedPoint newHandle1 = targetSpline.TransformPoint(targetSpline.handle1);
-            OrientedPoint newHandle2 = targetSpline.TransformPoint(targetSpline.handle2);
 
             GUIStyle style = GUIStyle.none;
             style.fontSize = 15;
             style.alignment = TextAnchor.MiddleCenter;
             style.normal.textColor = Color.white;
 
+            Handles.color = Color.blue;
 
+            OrientedPoint newControlPoint1 = targetSpline.TransformPoint(targetSpline.controlPoint1);
+        
             Handles.Label(newControlPoint1.position, "Control Point 1", style );
-            Handles.Label(newControlPoint2.position, "Control Point 2", style );
-            Handles.Label(newHandle1.position, "Handle 1", style );
-            Handles.Label(newHandle2.position, "Handle 2", style );
+            float controlPoint1Size = HandleUtility.GetHandleSize(newControlPoint1.position) * 0.25f;
+            if ( Handles.Button(newControlPoint1.position, Quaternion.identity, controlPoint1Size, controlPoint1Size, Handles.SphereHandleCap) ){
+                Debug.Log("controlPoint1");
+                currentlySelectedHandle = SelectedHandle.CP1;
+            }
 
-            Handles.TransformHandle(ref newControlPoint1.position, ref newControlPoint1.rotation);
-            Handles.TransformHandle(ref newControlPoint2.position, ref newControlPoint2.rotation);
-            newHandle1.position = Handles.PositionHandle(newHandle1.position, Quaternion.identity);
-            newHandle2.position = Handles.PositionHandle(newHandle2.position, Quaternion.identity);
+            OrientedPoint newControlPoint2 = targetSpline.TransformPoint(targetSpline.controlPoint2);
+        
+            Handles.Label(newControlPoint2.position, "Control Point 2", style );
+            float controlPoint2Size = HandleUtility.GetHandleSize(newControlPoint2.position) * 0.25f;
+            if ( Handles.Button(newControlPoint2.position, Quaternion.identity, controlPoint2Size, controlPoint2Size, Handles.SphereHandleCap) ){
+                Debug.Log("controlPoint2");
+                currentlySelectedHandle = SelectedHandle.CP2;
+            }
+
+            Handles.color = Color.red;
+
+            OrientedPoint newHandle1 = targetSpline.TransformPoint(targetSpline.handle1);
+        
+            float handle1Size = HandleUtility.GetHandleSize(newHandle1.position) * 0.2f;
+            if ( Handles.Button(newHandle1.position, Quaternion.identity, handle1Size, handle1Size, Handles.SphereHandleCap) ){
+                Debug.Log("handle1");
+                currentlySelectedHandle = SelectedHandle.H1;
+            }
+        
+            OrientedPoint newHandle2 = targetSpline.TransformPoint(targetSpline.handle2);
+        
+            float handle2Size = HandleUtility.GetHandleSize(newHandle2.position) * 0.2f;
+            if ( Handles.Button(newHandle2.position, Quaternion.identity, handle2Size, handle2Size, Handles.SphereHandleCap) ){
+                Debug.Log("handle2");
+                currentlySelectedHandle = SelectedHandle.H2;
+            }
+        
+		    EditorGUI.BeginChangeCheck();
+
+            switch (currentlySelectedHandle) {
+                case SelectedHandle.CP1:
+                    Handles.TransformHandle(ref newControlPoint1.position, ref newControlPoint1.rotation);
+                    break;
+                case SelectedHandle.CP2:
+                    Handles.TransformHandle(ref newControlPoint2.position, ref newControlPoint2.rotation);
+                    break;
+                case SelectedHandle.H1:
+                    newHandle1.position = Handles.PositionHandle(newHandle1.position, Quaternion.identity);
+                    break;
+                case SelectedHandle.H2:
+                    newHandle2.position = Handles.PositionHandle(newHandle2.position, Quaternion.identity);
+                    break;
+            }
+
 
             if ( EditorGUI.EndChangeCheck() ){
 
@@ -147,8 +198,11 @@ namespace SevenGame.Utility.Editor {
             OrientedPoint transformedHandle2 = scr.TransformPoint(scr.handle2);
             Handles.DrawBezier( transformedControlPoint1.position, transformedControlPoint2.position, transformedHandle1.position, transformedHandle2.position, Color.white, EditorGUIUtility.whiteTexture, 1f );
 
+            Gizmos.DrawLine( transformedControlPoint1.position, transformedHandle1.position );
+            Gizmos.DrawLine( transformedControlPoint2.position, transformedHandle2.position );
+
             for (int i = 0; i < scr.ringCount; i++){
-                OrientedPoint pointAlongTessel = scr.GetBezier( (float)i/((float)scr.ringCount - 1) );
+                OrientedPoint pointAlongTessel = scr.GetBezierUniform( (float)i/((float)scr.ringCount - 1) );
                 // pointAlongTessel.position = scr.transform.TransformPoint(pointAlongTessel.position);
                 // Vector3 velocityAlongTessel = GetVelocity( (float)i/(float)ringCount );
                 // Vector3 accelerationAlongTessel = GetAcceleration( (float)i/(float)ringCount );
@@ -191,6 +245,9 @@ namespace SevenGame.Utility.Editor {
             propLength = propSplineCurve.FindPropertyRelative( "_length" );
             propArcLengths = propSplineCurve.FindPropertyRelative( "_arcLengths" );
 
+            propStoppingPointCheck = so.FindProperty( "hasStoppingPoint" );
+            propStoppingPoint = so.FindProperty( "stoppingPoint" );
+
             propNextSegment = so.FindProperty( "nextSegment" );
             propPrevSegment = so.FindProperty( "prevSegment" );
 
@@ -203,6 +260,16 @@ namespace SevenGame.Utility.Editor {
 
         private void OnDisable(){
             Undo.undoRedoPerformed -= OnUndoRedo;
+        }
+
+
+
+        private enum SelectedHandle {
+            None,
+            CP1,
+            CP2,
+            H1,
+            H2
         }
     }
 }

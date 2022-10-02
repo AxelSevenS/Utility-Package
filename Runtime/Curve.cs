@@ -6,9 +6,94 @@ namespace SevenGame.Utility {
 
     [System.Serializable]
     public abstract class Curve {
-        public abstract void Move(Vector3 direction);
-        public abstract OrientedPoint GetPoint(float t);
+
+        private const int LENGTH_PRECISION = 100;
+
+
+        
+        [SerializeField] protected float _length;
+        [SerializeField] protected float[] _arcLengths;
+
+
+
+        public float length {
+            get {
+                if (_length == 0f)
+                    UpdateLength();
+                return _length;
+            }
+            private set {
+                _length = value;
+            }
+        }
+
+        public float[] arcLengths {
+            get {
+                if (_arcLengths == null || _arcLengths.Length == 0)
+                    UpdateLength();
+                return _arcLengths;
+            }
+            private set {
+                _arcLengths = value;
+            }
+        }
+
+
+
         public abstract void Reset();
+
+        public abstract void Move(Vector3 direction);
+
+        public abstract OrientedPoint GetPoint(float t);
+        public virtual OrientedPoint GetPointUniform(float t) {
+            float distance = t * length;
+
+            int upperBound = 1;
+            // find the bounds around distance in _arcLengths
+            while (upperBound < LENGTH_PRECISION && arcLengths[upperBound] < distance) {
+                upperBound++;
+            }
+            int lowerBound = upperBound - 1;
+
+            float tBetweenBounds = Mathf.InverseLerp(_arcLengths[lowerBound], _arcLengths[upperBound], distance);
+
+            const float PERCENTILE = 1f / (float)LENGTH_PRECISION;
+            float uniformT = Mathf.Lerp(lowerBound * PERCENTILE, upperBound * PERCENTILE, tBetweenBounds);
+
+            return GetPoint(uniformT);
+        }
+        
+        public virtual void UpdateLength() {
+            _arcLengths = new float[LENGTH_PRECISION + 1];
+            _arcLengths[0] = 0;
+
+            Vector3 lastPoint = GetPoint(0f).position;
+            _length = 0;
+
+            for (int i = 0; i < LENGTH_PRECISION + 1; i++) {
+                float t = (float)i / LENGTH_PRECISION;
+                Vector3 currentPoint = GetPoint(t).position;
+
+                _length += (lastPoint - currentPoint).magnitude;
+                _arcLengths[i] = _length;
+
+                lastPoint = currentPoint;
+            }
+        }
+
+        // public float SampleArcLengths(float t){
+            // int count = arcLengths.Length; 
+            // int precision = count - 1;
+            // float lengthIndex = t * (precision);
+            // int lowerBound = Mathf.FloorToInt(lengthIndex);
+            // int upperBound = Mathf.FloorToInt(lengthIndex + 1);
+            
+            // if ( upperBound >= count )
+                // return arcLengths[precision];
+            // if ( lowerBound < 0 )
+                // return arcLengths[0];
+            // return Mathf.Lerp( arcLengths[lowerBound], arcLengths[upperBound], lengthIndex - lowerBound);
+        // }
     }
 
     [System.Serializable]
@@ -41,11 +126,20 @@ namespace SevenGame.Utility {
             handle = new OrientedPoint(hPos);
         }
 
+
+
+        public override void Reset(){
+            controlPoint1 = new OrientedPoint();
+            controlPoint2 = new OrientedPoint(Vector3.forward * 50f);
+            handle = new OrientedPoint(Vector3.forward * 25f);
+
+        }
+
         public override void Move(Vector3 direction){
             controlPoint1.position += direction;
             controlPoint2.position += direction;
             handle.position += direction;
-        } 
+        }
 
         public override OrientedPoint GetPoint(float t){
             Vector3 a = Vector3.Lerp(controlPoint1.position, handle.position, t);
@@ -59,27 +153,10 @@ namespace SevenGame.Utility {
 
             return new OrientedPoint( c, rotation );
         }
-
-
-
-        public override void Reset(){
-            controlPoint1 = new OrientedPoint();
-            controlPoint2 = new OrientedPoint(Vector3.forward * 50f);
-            handle = new OrientedPoint(Vector3.forward * 25f);
-
-        }
     }
 
     [System.Serializable]
     public class BezierCubic : Curve {
-
-
-        private const int LENGTH_PRECISION = 100;
-
-
-
-        [SerializeField] private float _length;
-        [SerializeField] private float[] _arcLengths;
 
         public OrientedPoint controlPoint1;
         public OrientedPoint controlPoint2;
@@ -88,29 +165,13 @@ namespace SevenGame.Utility {
 
 
 
-        public float length {
-            get {
-                if (_length == 0f)
-                    UpdateLength(LENGTH_PRECISION);
-                return _length;
-            }
-            private set {
-                _length = value;
-            }
+        public override void Reset(){
+            controlPoint1 = new OrientedPoint();
+            controlPoint2 = new OrientedPoint(Vector3.forward * 75f);
+            handle1 = new OrientedPoint(Vector3.forward * 25f);
+            handle2 = new OrientedPoint(Vector3.forward * 50f);
+
         }
-
-        public float[] arcLengths {
-            get {
-                if (_arcLengths == null)
-                    UpdateLength(LENGTH_PRECISION);
-                return _arcLengths;
-            }
-            private set {
-                _arcLengths = value;
-            }
-        }
-
-
 
         public BezierCubic(){
             controlPoint1 = new OrientedPoint();
@@ -162,25 +223,6 @@ namespace SevenGame.Utility {
             return new OrientedPoint( f, rotation );
         }
 
-        public void UpdateLength() => UpdateLength(LENGTH_PRECISION);
-
-        private void UpdateLength(int precision) {
-            _arcLengths = new float[precision + 1];
-            _arcLengths[0] = 0;
-
-            Vector3 lastPoint = GetPoint(0f).position;
-            _length = 0;
-
-            for (int i = 0; i < precision + 1; i++) {
-                Vector3 currentPoint = GetPoint((float)i / precision).position;
-
-                _length += Vector3.Distance(lastPoint, currentPoint);
-                _arcLengths[i] = _length;
-
-                lastPoint = currentPoint;
-            }
-        }
-
         // public Vector3 GetVelocity(float t){
         //     float tPow2 = Mathf.Pow(t, 2f);
         //     Vector3 p0 = controlPoint1.position * ( (-3f * tPow2) + (6f * t) - 3f );
@@ -206,15 +248,72 @@ namespace SevenGame.Utility {
 
         //     return ( Vector3.Dot() );
         // }
+    }
 
-        
+    
+    [System.Serializable]
+    public class StraightLine : Curve {
+
+        public OrientedPoint controlPoint1;
+        public OrientedPoint controlPoint2;
+
+
+
+        public StraightLine(){
+            controlPoint1 = new OrientedPoint();
+            controlPoint2 = new OrientedPoint();
+        }
+        public StraightLine(Vector3 cp1Pos, Vector3 cp2Pos){
+            controlPoint1 = new OrientedPoint(cp1Pos);
+            controlPoint2 = new OrientedPoint(cp2Pos);
+        }
+        public StraightLine(OrientedPoint cp1Pos, OrientedPoint cp2Pos){
+            controlPoint1 = cp1Pos;
+            controlPoint2 = cp2Pos;
+        }
+        public StraightLine(Transform cp1Pos, Transform cp2Pos){
+            controlPoint1 = new OrientedPoint(cp1Pos);
+            controlPoint2 = new OrientedPoint(cp2Pos);
+        }
+
+
 
         public override void Reset(){
             controlPoint1 = new OrientedPoint();
-            controlPoint2 = new OrientedPoint(Vector3.forward * 75f);
-            handle1 = new OrientedPoint(Vector3.forward * 25f);
-            handle2 = new OrientedPoint(Vector3.forward * 50f);
+            controlPoint2 = new OrientedPoint(Vector3.forward * 50f);
 
+        }
+
+        public override void Move(Vector3 direction){
+            controlPoint1.position += direction;
+            controlPoint2.position += direction;
+        }
+
+        public override OrientedPoint GetPoint(float t){
+            Vector3 position = Vector3.Lerp(controlPoint1.position, controlPoint2.position, t);
+            Vector3 tForward = (controlPoint2.position - controlPoint1.position).normalized;
+            Vector3 tUp = Vector3.Lerp(controlPoint1.rotation * Vector3.up, controlPoint2.rotation * Vector3.up, t);
+            Quaternion rotation = Quaternion.LookRotation( tForward, tUp);
+
+            return new OrientedPoint( position , rotation );
+        }
+
+        public override OrientedPoint GetPointUniform(float t) {
+            return GetPoint(t);
+        }
+
+        public override void UpdateLength() {
+
+            _arcLengths = new float[2];
+            _arcLengths[0] = 0;
+
+            _length = 0;
+
+            Vector3 firstPoint = GetPoint(0f).position;
+            Vector3 lastPoint = GetPoint(1f).position;
+            
+            _length = (firstPoint - lastPoint).magnitude;
+            _arcLengths[1] = _length;
         }
     }
 

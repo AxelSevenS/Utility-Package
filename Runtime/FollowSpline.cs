@@ -6,52 +6,79 @@ namespace SevenGame.Utility {
     
     public class FollowSpline : MonoBehaviour{
 
-        [SerializeField] private float speed, moveSpeed, slowDown;
-        [SerializeField] private bool onGoing;
-        [SerializeField] private bool goingForward = true;
+        [SerializeField] private float maxSpeed;
+        [SerializeField] private float moveSpeed;
+        [SerializeField] private MovementDirection movementDirection;
+
         [SerializeField] private Spline spline;
         private OrientedPoint splinePosition;
-        [Range(0, 1f)] [SerializeField] private float weight = 0.9995f;
+        [Range(0, 1f)] [SerializeField] private float weight = 0.5f;
         [Range(0, 1f)] [SerializeField] private float t;
-        private float prevT;
-        private float increment;
+
+        private float maxSpeedOnSlowDown;
+
+
+        private bool goingForward => movementDirection == MovementDirection.Forward;
+        private Spline nextSpline => goingForward ? spline.nextSegment : spline.prevSegment;
+
+
 
         void FixedUpdate(){
-            prevT = t;
+            if (movementDirection == MovementDirection.None) {
+                maxSpeedOnSlowDown = 0f;
+                return;
+            }
 
-            moveSpeed = Mathf.MoveTowards(moveSpeed, speed * System.Convert.ToSingle(onGoing) * (System.Convert.ToSingle(goingForward)*2f - 1f), 1f-weight);
-            if ((goingForward && spline.nextSegment == null) || (!goingForward && spline.prevSegment == null))
-                slowDown = Mathf.Min(1f, Mathf.Abs(System.Convert.ToSingle(goingForward)-t)+0.2f);
-            else
-                slowDown = 1f;
 
-            increment = (moveSpeed * slowDown / 10f * GameUtility.timeDelta);
+            float direction = (float)movementDirection;
+
+            if ( spline.hasStoppingPoint || nextSpline == null ) {
+
+                float stoppingPoint = spline.hasStoppingPoint ? spline.stoppingPoint : (goingForward ? 1f : 0f);
+
+                float slowT = goingForward ? 
+                    t / stoppingPoint : 
+                    (1f - t) / (1f - stoppingPoint);
+                
+                moveSpeed = Mathf.Lerp(maxSpeedOnSlowDown, 0f, slowT);
+
+            } else {
+
+                // moveSpeed = Mathf.MoveTowards(moveSpeed, maxSpeed, (1f - weight) * GameUtility.timeDelta);
+                moveSpeed = maxSpeed;
+                maxSpeedOnSlowDown = moveSpeed;
+                
+            }
+
+            // Move along spline
+            float distanceToMove = (moveSpeed * direction) / 40f * GameUtility.timeDelta;
+            t += distanceToMove;
+
+
+            // If the object has reached the end of the spline, go to the next one
+            while ( goingForward && t > 1f && nextSpline != null) {
+                spline = spline.nextSegment;
+                t -= 1f;
+            }
+            while ( !goingForward && t < 0f && nextSpline != null) {
+                spline = spline.prevSegment;
+                t += 1f;
+            }
+ 
             
-            t += increment;
+            // Move
+            splinePosition = spline.GetBezierUniform(t);
 
-            SwitchSegment();
-
-            splinePosition = spline.GetBezier(t);
-            transform.position = Vector3.Lerp(transform.position, splinePosition.position, 0.1f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, splinePosition.rotation, 0.1f);
+            transform.position = Vector3.Lerp(transform.position, splinePosition.position, GameUtility.timeDelta);
+            transform.rotation = Quaternion.Slerp(transform.rotation, splinePosition.rotation, GameUtility.timeDelta);
         }
 
-        private void SwitchSegment(){
-            if (goingForward && t >= 1f){
-                if (spline.nextSegment != null){
-                    spline = spline.nextSegment;
-                    t -= 1f;
-                }else{
-                    goingForward = false;
-                }
-            }else if (!goingForward && t <= 0f){
-                if (spline.prevSegment != null){
-                    spline = spline.prevSegment;
-                    t += 1f;
-                }else{
-                    goingForward = true;
-                }
-            }
+
+
+        private enum MovementDirection {
+            Backward = -1,
+            None = 0,
+            Forward = 1
         }
 
     }

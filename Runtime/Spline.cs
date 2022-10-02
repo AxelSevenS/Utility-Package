@@ -47,6 +47,9 @@ namespace SevenGame.Utility {
         public float length => splineCurve.length;
         public float[] arcLengths => splineCurve.arcLengths;
 
+        public bool hasStoppingPoint = false;
+        public float stoppingPoint = 0.5f;
+
         public ref OrientedPoint controlPoint1 => ref splineCurve.controlPoint1;
         public ref OrientedPoint controlPoint2 => ref splineCurve.controlPoint2;
         public ref OrientedPoint handle1 => ref splineCurve.handle1;
@@ -58,6 +61,7 @@ namespace SevenGame.Utility {
         public OrientedPoint InverseTransformPoint(OrientedPoint point) => transform.InverseTransformPoint(point);
 
         public OrientedPoint GetBezier(float tVal) => TransformPoint(splineCurve.GetPoint(tVal));
+        public OrientedPoint GetBezierUniform(float tVal) => TransformPoint(splineCurve.GetPointUniform(tVal));
 
         public void UpdateMesh(){
 
@@ -81,7 +85,7 @@ namespace SevenGame.Utility {
             for (int ring = 0; ring < ringCount; ring++){
 
                 float t = ring / (ringCount-1f);
-                OrientedPoint op = splineCurve.GetPoint(t);
+                OrientedPoint op = splineCurve.GetPointUniform(t);
 
                 for (int j = 0; j < mesh2D.vertexCount; j++){
                     vertices.Add(op.position + (op.rotation * mesh2D.vertices[j].point)*scale);
