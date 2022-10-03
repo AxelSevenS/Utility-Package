@@ -1,6 +1,6 @@
 {
     "name": "com.seven.utility",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "displayName": "Utility Package",
     "description": "Math, Collision, Mesh Generation, GameObject Utility",
     "unity": "2021.3",
@@ -9,4 +9,4 @@
       "name": "Seven",
       "email": "axelsevenet@gmail.com"
     }
-  }
+}
