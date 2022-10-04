@@ -5,9 +5,16 @@ using UnityEditor;
 using UnityEngine;
 
 namespace SevenGame.Utility {
+	
 	[CustomPropertyDrawer(typeof(EnumFlagAttribute))]
 	public class EnumFlagDrawer : PropertyDrawer {
+
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+			if (property.propertyType != SerializedPropertyType.Enum) {
+				Debug.LogError("EnumFlagAttribute can only be used on enums");
+				return;
+			}
 
 			EnumFlagAttribute flagSettings = (EnumFlagAttribute)attribute;
 			Enum targetEnum = (Enum)Enum.ToObject(fieldInfo.FieldType, property.intValue);

@@ -1,6 +1,8 @@
 using UnityEngine;
 
 namespace SevenGame.Utility {
+
+	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	public class EnumFlagAttribute : PropertyAttribute {
 		public string displayName;
 

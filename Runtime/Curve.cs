@@ -28,8 +28,14 @@ namespace SevenGame.Utility {
         }
 
 
+        public Curve() {;}
+        public Curve(ControlPoint cp1, ControlPoint cp2) : base(cp1, cp2) {}
+        public Curve(Vector3 cp1Pos, Vector3 cp2Pos) : base(cp1Pos, cp2Pos) {}
+        public Curve(Transform cp1, Transform cp2) : base(cp1, cp2) {}
 
-        public override OrientedPoint GetPointUniform(float t) {
+
+
+        public override float GetUniformT(float t) {
             // Get the distance along the curve the T value represents
             float distance = t * length;
 
@@ -47,8 +53,10 @@ namespace SevenGame.Utility {
             const float PERCENTILE = 1f / (float)LENGTH_PRECISION;
             float uniformT = Mathf.Lerp(lowerBound * PERCENTILE, upperBound * PERCENTILE, tBetweenBounds);
 
-            return GetPoint(uniformT);
+            return uniformT;
         }
+
+
         
         public override void UpdateLength() {
             _arcLengths = new float[LENGTH_PRECISION + 1];

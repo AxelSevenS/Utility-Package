@@ -8,18 +8,19 @@ namespace SevenGame.Utility {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
     [DisallowMultipleComponent]
-    public class Spline : MonoBehaviour {
-
-        private const int LENGTH_PRECISION = 100;
-
-
+    public sealed class Spline : MonoBehaviour {
 
         private Mesh mesh;
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
         
-        public BezierCubic splineCurve;
-        public Spline prevSegment, nextSegment;
+        public SegmentType segmentType = SegmentType.BezierCubic;
+        [SerializeField] private LineSegment _linearSegment;
+        [SerializeField] private BezierCubic _bezierCubic;
+        [SerializeField] private BezierQuadratic _bezierQuadratic;
+
+        public Spline previousSpline;
+        public Spline nextSpline;
 
         
         public RepeatableMesh mesh2D;
@@ -27,7 +28,24 @@ namespace SevenGame.Utility {
         public int ringCount = 4;
         public float scale = 1f;
 
+        public bool hasStoppingPoint = false;
+        public float stoppingPoint = 0.5f;
 
+
+
+
+        public Segment segment {
+            get {
+                switch (segmentType) {
+                    default:
+                        return _linearSegment;
+                    case SegmentType.BezierCubic:
+                        return _bezierCubic;
+                    case SegmentType.BezierQuadratic:
+                        return _bezierQuadratic;
+                }
+            }
+        }
 
         public MeshFilter meshFilter {
             get {
@@ -44,24 +62,57 @@ namespace SevenGame.Utility {
             }
         }
         
-        public float length => splineCurve.length;
-        public float[] arcLengths => splineCurve.arcLengths;
+        public float length => segment.length;
+        public float[] arcLengths {
+            get {
+                if (segment is Curve curve)
+                    return curve.arcLengths;
+                Debug.Log("Spline.arcLengths: segment is not a curve");
+                return null;
+            }
+        }
 
-        public bool hasStoppingPoint = false;
-        public float stoppingPoint = 0.5f;
+        public ref ControlPoint cp1 => ref segment.controlPoint1;
+        public ref ControlPoint cp2 => ref segment.controlPoint2;
+        public ref Vector3 h {
+            get {
+                if (segment is BezierQuadratic bezierQuadratic)
+                    return ref bezierQuadratic.handle;
 
-        public ref OrientedPoint controlPoint1 => ref splineCurve.controlPoint1;
-        public ref OrientedPoint controlPoint2 => ref splineCurve.controlPoint2;
-        public ref OrientedPoint handle1 => ref splineCurve.handle1;
-        public ref OrientedPoint handle2 => ref splineCurve.handle2;
+                throw new System.Exception("Spline.handle: segment is not a Quadratic Bezier");
+            }
+        }
+        public ref Vector3 h1 {
+            get {
+                if (segment is BezierCubic bezierCubic)
+                    return ref bezierCubic.handle1;
+
+                if (segment is BezierQuadratic bezierQuadratic)
+                    return ref bezierQuadratic.handle;
+
+                throw new System.Exception("Spline.handle1: segment is not a curve");
+            }
+        }
+        public ref Vector3 h2 {
+            get {
+                if (segment is BezierCubic bezierCubic)
+                    return ref bezierCubic.handle2;
+                    
+                if (segment is BezierQuadratic bezierQuadratic)
+                    return ref bezierQuadratic.handle;
+
+                throw new System.Exception("Spline.handle2: segment is not a curve");
+            }
+        }
 
 
 
-        public OrientedPoint TransformPoint(OrientedPoint point) => transform.TransformPoint(point);
-        public OrientedPoint InverseTransformPoint(OrientedPoint point) => transform.InverseTransformPoint(point);
+        // public OrientedPoint TransformPoint(OrientedPoint point) => transform.TransformPoint(point);
+        // public OrientedPoint InverseTransformPoint(OrientedPoint point) => transform.InverseTransformPoint(point);
 
-        public OrientedPoint GetBezier(float tVal) => TransformPoint(splineCurve.GetPoint(tVal));
-        public OrientedPoint GetBezierUniform(float tVal) => TransformPoint(splineCurve.GetPointUniform(tVal));
+        public OrientedPoint GetPoint(float tVal) => transform.Transform( segment.GetPoint(tVal) );
+        public OrientedPoint GetPointUniform(float tVal) => transform.Transform( segment.GetPoint( segment.GetUniformT(tVal) ) );
+        public Vector3 GetTangent(float tVal) => transform.TransformDirection( segment.GetTangent(tVal) );
 
         public void UpdateMesh(){
 
@@ -73,10 +124,11 @@ namespace SevenGame.Utility {
 
             if (mesh != null) {
                 mesh.Clear();
-            }else{
+            } else {
                 mesh = new Mesh();
                 mesh.name = $"Procedural {mesh2D.name} mesh";
             }
+
             List<Vector3> vertices = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
             List<Vector2> uvs = new List<Vector2>();
@@ -85,7 +137,7 @@ namespace SevenGame.Utility {
             for (int ring = 0; ring < ringCount; ring++){
 
                 float t = ring / (ringCount-1f);
-                OrientedPoint op = splineCurve.GetPointUniform(t);
+                OrientedPoint op = segment.GetPoint( segment.GetUniformT(t) );
 
                 for (int j = 0; j < mesh2D.vertexCount; j++){
                     vertices.Add(op.position + (op.rotation * mesh2D.vertices[j].point)*scale);
@@ -131,62 +183,102 @@ namespace SevenGame.Utility {
             meshFilter.sharedMesh = mesh;
             meshCollider.sharedMesh = mesh;
 
-            splineCurve.UpdateLength();
+            segment.UpdateLength();
         }
 
         public void UpdateOtherSegments(){
             UpdateMesh();
-            if(nextSegment != null){
-                nextSegment.controlPoint1.Set(nextSegment.InverseTransformPoint(TransformPoint(controlPoint2)));
-                Vector3 displacement = TransformPoint(controlPoint2).position - TransformPoint(handle2).position;
-                nextSegment.handle1.Set( nextSegment.InverseTransformPoint(nextSegment.TransformPoint(nextSegment.controlPoint1) + displacement) );
-                nextSegment.UpdateMesh();
+            UpdateNextSegment();
+            UpdatePreviousSegment();
+        }
+
+        private void UpdatePreviousSegment() {
+            if (previousSpline == null) return;
+
+            Segment thisSegment = this.segment;
+            Segment previousSegment = previousSpline.segment;
+
+            if (thisSegment is BezierCubic && previousSegment is BezierCubic) {
+                previousSpline.cp2.Set( previousSpline.transform.InverseTransform(transform.Transform(cp1)) );
+                previousSpline.h2 = previousSpline.cp2.position + (cp1.position - h1);
+                previousSpline.UpdateMesh();
             }
-            if(prevSegment != null){
-                prevSegment.controlPoint2.Set(prevSegment.InverseTransformPoint(TransformPoint(controlPoint1)));
-                Vector3 displacement = TransformPoint(controlPoint1).position - TransformPoint(handle1).position;
-                prevSegment.handle2.Set( prevSegment.InverseTransformPoint(prevSegment.TransformPoint(prevSegment.controlPoint2) + displacement) );
-                prevSegment.UpdateMesh();
+
+            if (thisSegment is BezierQuadratic && previousSegment is BezierQuadratic) {
+                previousSpline.cp2.Set( previousSpline.transform.InverseTransform(transform.Transform(cp1)) );
+                previousSpline.h = previousSpline.cp2.position + (cp1.position - h);
+                previousSpline.UpdateMesh();
             }
         }
 
-        public void AddNext(){
-            Vector3 displacement = controlPoint2.position - controlPoint1.position;
-            nextSegment = Instantiate(gameObject, transform.position + displacement, transform.rotation, transform.parent).GetComponent<Spline>();
-            nextSegment.prevSegment = this;
+        private void UpdateNextSegment() {
+            if (nextSpline == null) return;
+            
+            Segment thisSegment = this.segment;
+            Segment nextSegment = nextSpline.segment;
 
-            nextSegment.gameObject.name = "Segment";
+            if (thisSegment is BezierCubic && nextSegment is BezierCubic) {
+                nextSpline.cp1.Set( nextSpline.transform.InverseTransform(transform.Transform(cp2)) );
+                nextSpline.h1 = nextSpline.cp1.position + (cp2.position - h2);
+                nextSpline.UpdateMesh();
+            }
+
+            if (thisSegment is BezierQuadratic && nextSegment is BezierQuadratic) {
+                nextSpline.cp1.Set( nextSpline.transform.InverseTransform(transform.Transform(cp2)) );
+                nextSpline.h = nextSpline.cp2.position + (cp2.position - h);
+                nextSpline.UpdateMesh();
+            }
+        }
+
+
+        public void AddNext(){
+            Vector3 displacement = cp2.position - cp1.position;
+            nextSpline = Instantiate(gameObject, transform.position + displacement, transform.rotation, transform.parent).GetComponent<Spline>();
+            nextSpline.previousSpline = this;
+
+            nextSpline.gameObject.name = "Segment";
 
             UpdateOtherSegments();
         }
         public void RemoveNext() {
-            if (nextSegment.nextSegment != null)
-                nextSegment.nextSegment.prevSegment = null;
-            GameUtility.SafeDestroy(nextSegment.gameObject);
-            nextSegment = null;
+            if (nextSpline.nextSpline != null)
+                nextSpline.nextSpline.previousSpline = null;
+            GameUtility.SafeDestroy(nextSpline.gameObject);
+            nextSpline = null;
         }
 
-        public void AddPrev(){
-            Vector3 displacement = controlPoint1.position - controlPoint2.position;
-            prevSegment = Instantiate(gameObject, transform.position + displacement, transform.rotation, transform.parent).GetComponent<Spline>();
-            prevSegment.nextSegment = this;
 
-            prevSegment.gameObject.name = "Segment";
+        public void AddPrev(){
+            Vector3 displacement = cp1.position - cp2.position;
+            previousSpline = Instantiate(gameObject, transform.position + displacement, transform.rotation, transform.parent).GetComponent<Spline>();
+            previousSpline.nextSpline = this;
+
+            previousSpline.gameObject.name = "Segment";
             
             UpdateOtherSegments();
         }
         public void RemovePrev(){
-            if (prevSegment.prevSegment != null)
-                prevSegment.prevSegment.nextSegment = null;
-            GameUtility.SafeDestroy(prevSegment.gameObject);
-            prevSegment = null;
+            if (previousSpline.previousSpline != null)
+                previousSpline.previousSpline.nextSpline = null;
+            GameUtility.SafeDestroy(previousSpline.gameObject);
+            previousSpline = null;
         }
 
 
 
         private void Reset(){
-            splineCurve = new BezierCubic();
-            splineCurve.Reset();
+            _linearSegment = new LineSegment();
+            _bezierQuadratic = new BezierQuadratic();
+            _bezierCubic = new BezierCubic();
+            UpdateOtherSegments();
+        }
+
+
+
+        public enum SegmentType {
+            Linear,
+            BezierCubic,
+            BezierQuadratic
         }
 
     }

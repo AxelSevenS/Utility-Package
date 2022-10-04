@@ -19,7 +19,7 @@ namespace SevenGame.Utility {
 
 
         private bool goingForward => movementDirection == MovementDirection.Forward;
-        private Spline nextSpline => goingForward ? spline.nextSegment : spline.prevSegment;
+        private Spline nextSpline => goingForward ? spline.nextSpline : spline.previousSpline;
 
 
 
@@ -57,17 +57,17 @@ namespace SevenGame.Utility {
 
             // If the object has reached the end of the spline, go to the next one
             while ( goingForward && t > 1f && nextSpline != null) {
-                spline = spline.nextSegment;
+                spline = spline.nextSpline;
                 t -= 1f;
             }
             while ( !goingForward && t < 0f && nextSpline != null) {
-                spline = spline.prevSegment;
+                spline = spline.previousSpline;
                 t += 1f;
             }
  
             
             // Move
-            splinePosition = spline.GetBezierUniform(t);
+            splinePosition = spline.GetPointUniform(t);
 
             transform.position = Vector3.Lerp(transform.position, splinePosition.position, GameUtility.timeDelta);
             transform.rotation = Quaternion.Slerp(transform.rotation, splinePosition.rotation, GameUtility.timeDelta);

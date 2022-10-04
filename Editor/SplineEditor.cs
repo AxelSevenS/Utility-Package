@@ -14,11 +14,11 @@ namespace SevenGame.Utility.Editor {
         private Spline targetSpline;
 
         private SerializedObject so;
-        private SerializedProperty propSplineCurve;
-        private SerializedProperty propControlPoint1;
-        private SerializedProperty propControlPoint2;
-        private SerializedProperty propHandle1;
-        private SerializedProperty propHandle2;
+        private SerializedProperty propSegmentType;
+
+        private SerializedProperty propLinearSegment;
+        private SerializedProperty propBezierCubic;
+        private SerializedProperty propBezierQuadratic;
 
         private SerializedProperty propLength;
         private SerializedProperty propArcLengths;
@@ -33,9 +33,20 @@ namespace SevenGame.Utility.Editor {
         private SerializedProperty propCount;
         private SerializedProperty propScale;
 
+        private Spline.SegmentType segmentType => targetSpline.segmentType;
+        private SerializedProperty propSegment {
+            get {
+                switch (segmentType) {
+                    default:
+                        return propLinearSegment;
+                    case Spline.SegmentType.BezierCubic:
+                        return propBezierCubic;
+                    case Spline.SegmentType.BezierQuadratic:
+                        return propBezierQuadratic;
+                }
+            }
+        }
 
-
-        private SelectedHandle currentlySelectedHandle;
 
 
         private void OnUndoRedo(){
@@ -43,11 +54,21 @@ namespace SevenGame.Utility.Editor {
         }
         
         public override void OnInspectorGUI(){
-            /* DrawDefaultInspector(); */
 
 		    EditorGUI.BeginChangeCheck();
 
-            EditorGUILayout.PropertyField( propSplineCurve, new GUIContent("Spline") );
+            EditorGUILayout.PropertyField( propSegmentType, new GUIContent("Segment Type") );
+
+            if (EditorGUI.EndChangeCheck()) {
+                targetSpline.segmentType = (Spline.SegmentType)propSegmentType.enumValueIndex;
+
+                Undo.RecordObject(targetSpline, "Change Segment Type");
+                targetSpline.UpdateOtherSegments();
+            }
+
+		    EditorGUI.BeginChangeCheck();
+
+            EditorGUILayout.PropertyField( propSegment, new GUIContent("Segment") );
 
             GUILayout.Space( 15 );
 
@@ -60,7 +81,7 @@ namespace SevenGame.Utility.Editor {
 
                     GUILayout.Space( 5 );
 
-                    if (targetSpline.prevSegment == null){
+                    if (targetSpline.previousSpline == null){
                         if (GUILayout.Button( "Add Previous Segment" )) targetSpline.AddPrev();
                     }else{
                         if (GUILayout.Button( "Remove Previous Segment" )) targetSpline.RemovePrev();
@@ -72,7 +93,7 @@ namespace SevenGame.Utility.Editor {
 
                     GUILayout.Space( 5 );
 
-                    if (targetSpline.nextSegment == null){
+                    if (targetSpline.nextSpline == null){
                         if (GUILayout.Button( "Add Next Segment" )) targetSpline.AddNext();
                     }else {
                         if (GUILayout.Button( "Remove Next Segment" )) targetSpline.RemoveNext();
@@ -111,108 +132,33 @@ namespace SevenGame.Utility.Editor {
             }
         }
 
-        public void OnSceneGUI(){
-
-            GUIStyle style = GUIStyle.none;
-            style.fontSize = 15;
-            style.alignment = TextAnchor.MiddleCenter;
-            style.normal.textColor = Color.white;
-
-            Handles.color = Color.blue;
-
-            OrientedPoint newControlPoint1 = targetSpline.TransformPoint(targetSpline.controlPoint1);
-        
-            Handles.Label(newControlPoint1.position, "Control Point 1", style );
-            float controlPoint1Size = HandleUtility.GetHandleSize(newControlPoint1.position) * 0.25f;
-            if ( Handles.Button(newControlPoint1.position, Quaternion.identity, controlPoint1Size, controlPoint1Size, Handles.SphereHandleCap) ){
-                Debug.Log("controlPoint1");
-                currentlySelectedHandle = SelectedHandle.CP1;
-            }
-
-            OrientedPoint newControlPoint2 = targetSpline.TransformPoint(targetSpline.controlPoint2);
-        
-            Handles.Label(newControlPoint2.position, "Control Point 2", style );
-            float controlPoint2Size = HandleUtility.GetHandleSize(newControlPoint2.position) * 0.25f;
-            if ( Handles.Button(newControlPoint2.position, Quaternion.identity, controlPoint2Size, controlPoint2Size, Handles.SphereHandleCap) ){
-                Debug.Log("controlPoint2");
-                currentlySelectedHandle = SelectedHandle.CP2;
-            }
-
-            Handles.color = Color.red;
-
-            OrientedPoint newHandle1 = targetSpline.TransformPoint(targetSpline.handle1);
-        
-            float handle1Size = HandleUtility.GetHandleSize(newHandle1.position) * 0.2f;
-            if ( Handles.Button(newHandle1.position, Quaternion.identity, handle1Size, handle1Size, Handles.SphereHandleCap) ){
-                Debug.Log("handle1");
-                currentlySelectedHandle = SelectedHandle.H1;
-            }
-        
-            OrientedPoint newHandle2 = targetSpline.TransformPoint(targetSpline.handle2);
-        
-            float handle2Size = HandleUtility.GetHandleSize(newHandle2.position) * 0.2f;
-            if ( Handles.Button(newHandle2.position, Quaternion.identity, handle2Size, handle2Size, Handles.SphereHandleCap) ){
-                Debug.Log("handle2");
-                currentlySelectedHandle = SelectedHandle.H2;
-            }
-        
-		    EditorGUI.BeginChangeCheck();
-
-            switch (currentlySelectedHandle) {
-                case SelectedHandle.CP1:
-                    Handles.TransformHandle(ref newControlPoint1.position, ref newControlPoint1.rotation);
-                    break;
-                case SelectedHandle.CP2:
-                    Handles.TransformHandle(ref newControlPoint2.position, ref newControlPoint2.rotation);
-                    break;
-                case SelectedHandle.H1:
-                    newHandle1.position = Handles.PositionHandle(newHandle1.position, Quaternion.identity);
-                    break;
-                case SelectedHandle.H2:
-                    newHandle2.position = Handles.PositionHandle(newHandle2.position, Quaternion.identity);
-                    break;
-            }
-
-
-            if ( EditorGUI.EndChangeCheck() ){
-
-                Undo.RecordObject( target, "Edited Spline" ); 
-
-                targetSpline.controlPoint1.Set(targetSpline.transform.InverseTransformPoint(newControlPoint1));
-                targetSpline.controlPoint2.Set(targetSpline.transform.InverseTransformPoint(newControlPoint2));
-
-                targetSpline.handle1.Set(targetSpline.transform.InverseTransformPoint(newHandle1));
-                targetSpline.handle2.Set(targetSpline.transform.InverseTransformPoint(newHandle2));
-
-                targetSpline.UpdateOtherSegments();
-
-            }
-        }
-
         [DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.Active)]
         private static void OnDrawGizmosSelected(Spline scr, GizmoType gizmoType) {
 
-            OrientedPoint transformedControlPoint1 = scr.TransformPoint(scr.controlPoint1);
-            OrientedPoint transformedControlPoint2 = scr.TransformPoint(scr.controlPoint2);
-            OrientedPoint transformedHandle1 = scr.TransformPoint(scr.handle1);
-            OrientedPoint transformedHandle2 = scr.TransformPoint(scr.handle2);
-            Handles.DrawBezier( transformedControlPoint1.position, transformedControlPoint2.position, transformedHandle1.position, transformedHandle2.position, Color.white, EditorGUIUtility.whiteTexture, 1f );
+            ControlPoint transformedControlPoint1 = scr.transform.Transform(scr.cp1);
+            ControlPoint transformedControlPoint2 = scr.transform.Transform(scr.cp2);
 
-            Gizmos.DrawLine( transformedControlPoint1.position, transformedHandle1.position );
-            Gizmos.DrawLine( transformedControlPoint2.position, transformedHandle2.position );
+            switch ( scr.segmentType ){
+                default:
+                    Gizmos.DrawLine( transformedControlPoint1.position, transformedControlPoint2.position );
+                    break;
+                case Spline.SegmentType.BezierCubic:
+                    Vector3 transformedHandle1 = scr.transform.TransformPoint(scr.h1);
+                    Vector3 transformedHandle2 = scr.transform.TransformPoint(scr.h2);
+                    Handles.DrawBezier( transformedControlPoint1.position, transformedControlPoint2.position, transformedHandle1, transformedHandle2, Color.white, EditorGUIUtility.whiteTexture, 1f );
+                    Gizmos.DrawLine( transformedControlPoint1.position, transformedHandle1 );
+                    Gizmos.DrawLine( transformedControlPoint2.position, transformedHandle2 );
+                    break;
+                case Spline.SegmentType.BezierQuadratic:
+                    Vector3 transformedHandle = scr.transform.TransformPoint(scr.h);
+                    // Handles.DrawBezier( transformedControlPoint1.position, transformedControlPoint2.position, transformedHandle.position, transformedHandle.position, Color.white, EditorGUIUtility.whiteTexture, 1f );
+                    Gizmos.DrawLine( transformedControlPoint1.position, transformedHandle );
+                    Gizmos.DrawLine( transformedControlPoint2.position, transformedHandle );
+                    break;
+            }
 
             for (int i = 0; i < scr.ringCount; i++){
-                OrientedPoint pointAlongTessel = scr.GetBezierUniform( (float)i/((float)scr.ringCount - 1) );
-                // pointAlongTessel.position = scr.transform.TransformPoint(pointAlongTessel.position);
-                // Vector3 velocityAlongTessel = GetVelocity( (float)i/(float)ringCount );
-                // Vector3 accelerationAlongTessel = GetAcceleration( (float)i/(float)ringCount );
-
-                // Gizmos.color = Color.magenta;
-                // Gizmos.DrawLine( pointAlongTessel.position, pointAlongTessel.position + velocityAlongTessel );
-
-                // Gizmos.color = Color.blue;
-                // Gizmos.DrawLine( pointAlongTessel.position, pointAlongTessel.position + accelerationAlongTessel );
-
+                OrientedPoint pointAlongTessel = scr.GetPointUniform( (float)i/((float)scr.ringCount - 1) );
 
                 if (scr.mesh2D == null) continue;
                 Gizmos.color = Color.red;
@@ -221,7 +167,6 @@ namespace SevenGame.Utility.Editor {
                     Gizmos.DrawLine(pointAlongTessel.position + (pointAlongTessel.rotation * scr.mesh2D.vertices[j].point)*scr.scale, pointAlongTessel.position + (pointAlongTessel.rotation * scr.mesh2D.vertices[j+1].point)*scr.scale);
                 Gizmos.DrawLine(pointAlongTessel.position + (pointAlongTessel.rotation * scr.mesh2D.vertices[scr.mesh2D.vertices.Length-1].point)*scr.scale, pointAlongTessel.position + (pointAlongTessel.rotation * scr.mesh2D.vertices[0].point)*scr.scale);
                 
-                // Handles.PositionHandle(point.pos, point.rot);
             }
             if ( scr.transform.hasChanged ){
 
@@ -230,46 +175,128 @@ namespace SevenGame.Utility.Editor {
             }
         }
 
+        public void OnSceneGUI(){
+
+            ControlPoint controlPoint1 = targetSpline.transform.Transform(targetSpline.cp1);
+            Vector3 tangent1 = targetSpline.GetTangent(0f);
+            if ( DrawControlPointGUI( ref controlPoint1, tangent1, 0.25f, Color.red ) ) {
+                Undo.RecordObject(targetSpline, "Edited Cubic Spline");
+                targetSpline.cp1.Set(targetSpline.transform.InverseTransform(controlPoint1));
+                targetSpline.UpdateOtherSegments();
+            }
+
+            ControlPoint controlPoint2 = targetSpline.transform.Transform(targetSpline.cp2);
+            Vector3 tangent2 = targetSpline.GetTangent(1f);
+            if ( DrawControlPointGUI( ref controlPoint2, tangent2, 0.25f, Color.red ) ) {
+                Undo.RecordObject(targetSpline, "Edited Cubic Spline");
+                targetSpline.cp2.Set(targetSpline.transform.InverseTransform(controlPoint2));
+                targetSpline.UpdateOtherSegments();
+            }
+
+            switch ( segmentType ){
+                case Spline.SegmentType.BezierQuadratic:
+
+                    Vector3 handle = targetSpline.transform.TransformPoint(targetSpline.h);
+                    if ( DrawHandleGUI( ref handle, 0.2f, Color.blue ) ) {
+                        Undo.RecordObject(targetSpline, "Edited Cubic Spline");
+                        targetSpline.h = targetSpline.transform.InverseTransformPoint(handle);
+                        targetSpline.UpdateOtherSegments();
+                    }
+                    break;
+
+                case Spline.SegmentType.BezierCubic:
+
+                    Vector3 handle1 = targetSpline.transform.TransformPoint(targetSpline.h1);
+                    if ( DrawHandleGUI( ref handle1, 0.2f, Color.blue ) ) {
+                        Undo.RecordObject(targetSpline, "Edited Cubic Spline");
+                        targetSpline.h1 = targetSpline.transform.InverseTransformPoint(handle1);
+                        targetSpline.UpdateOtherSegments();
+                    }
+
+                    Vector3 handle2 = targetSpline.transform.TransformPoint(targetSpline.h2);
+                    if ( DrawHandleGUI( ref handle2, 0.2f, Color.blue ) ) {
+                        Undo.RecordObject(targetSpline, "Edited Cubic Spline");
+                        targetSpline.h2 = targetSpline.transform.InverseTransformPoint(handle2);
+                        targetSpline.UpdateOtherSegments();
+                    }
+                    break;
+            }
+
+        }
+
+        
+
+
+        private bool DrawControlPointGUI( ref ControlPoint point, Vector3 tangent, float size, Color color ) {
+
+            float handleSize = HandleUtility.GetHandleSize(point.position);
+            float moveHandleSize = handleSize * 0.2f;
+            Handles.color = color;
+
+
+            EditorGUI.BeginChangeCheck();
+
+
+            point.position = Handles.FreeMoveHandle(point.position, Quaternion.identity, moveHandleSize, Vector3.zero, Handles.SphereHandleCap);
+            // point.position = Handles.PositionHandle(point.position, Quaternion.identity);
+            
+            point.forward = tangent;
+
+            Quaternion newRotation = Handles.Disc(point.rotation, point.position, tangent, handleSize * 0.5f, false, 0f);
+            point.upAngle = Mathf.Abs(newRotation.eulerAngles.z);
+
+
+            return EditorGUI.EndChangeCheck();
+            
+        }
+
+        private bool DrawHandleGUI( ref Vector3 point, float size, Color color) {
+
+            float handleSize = HandleUtility.GetHandleSize(point) * 0.2f;
+            Handles.color = color;
+
+
+            EditorGUI.BeginChangeCheck();
+
+            point = Handles.FreeMoveHandle(point, Quaternion.identity, handleSize, Vector3.zero, Handles.SphereHandleCap);
+            // point = Handles.PositionHandle(point, Quaternion.identity);
+
+            return EditorGUI.EndChangeCheck();
+            
+        }
+
+
+
+
+
         
         
         private void OnEnable(){
             Undo.undoRedoPerformed += OnUndoRedo;
 
-            so = serializedObject;
-            propSplineCurve = so.FindProperty( "splineCurve" );
-            propControlPoint1 = propSplineCurve.FindPropertyRelative( "controlPoint1" );
-            propControlPoint2 = propSplineCurve.FindPropertyRelative( "controlPoint2" ); 
-            propHandle1 = propSplineCurve.FindPropertyRelative( "handle1" );
-            propHandle2 = propSplineCurve.FindPropertyRelative( "handle2" );
+            targetSpline = (Spline)target;
 
-            propLength = propSplineCurve.FindPropertyRelative( "_length" );
-            propArcLengths = propSplineCurve.FindPropertyRelative( "_arcLengths" );
+            so = serializedObject;
+            propSegmentType = so.FindProperty( "segmentType" );
+
+            propLinearSegment = so.FindProperty( "_linearSegment" );
+            propBezierCubic = so.FindProperty( "_bezierCubic" );
+            propBezierQuadratic = so.FindProperty( "_bezierQuadratic" );
 
             propStoppingPointCheck = so.FindProperty( "hasStoppingPoint" );
             propStoppingPoint = so.FindProperty( "stoppingPoint" );
 
-            propNextSegment = so.FindProperty( "nextSegment" );
-            propPrevSegment = so.FindProperty( "prevSegment" );
+            propNextSegment = so.FindProperty( "nextSpline" );
+            propPrevSegment = so.FindProperty( "previousSpline" );
 
             propMesh2D = so.FindProperty( "mesh2D" );
             propCount = so.FindProperty( "ringCount" );
             propScale = so.FindProperty( "scale" );
-
-            targetSpline = (Spline)target;
         }
 
         private void OnDisable(){
             Undo.undoRedoPerformed -= OnUndoRedo;
         }
 
-
-
-        private enum SelectedHandle {
-            None,
-            CP1,
-            CP2,
-            H1,
-            H2
-        }
     }
 }

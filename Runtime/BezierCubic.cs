@@ -7,67 +7,65 @@ namespace SevenGame.Utility {
     [System.Serializable]
     public class BezierCubic : Curve {
 
-        public OrientedPoint handle1;
-        public OrientedPoint handle2;
+        public Vector3 handle1 = Vector3.forward * 50f/3f;
+        public Vector3 handle2 = Vector3.forward * 100f/3f;
 
 
 
-        public override void Reset(){
-            controlPoint1 = new OrientedPoint();
-            controlPoint2 = new OrientedPoint(Vector3.forward * 75f);
-            handle1 = new OrientedPoint(Vector3.forward * 25f);
-            handle2 = new OrientedPoint(Vector3.forward * 50f);
-
-        }
-
-        public BezierCubic(){
-            controlPoint1 = new OrientedPoint();
-            controlPoint2 = new OrientedPoint();
-            handle1 = new OrientedPoint();
-            handle2 = new OrientedPoint();
-        }
-        public BezierCubic(Vector3 cp1Pos, Vector3 cp2Pos, Vector3 h1Pos, Vector3 h2Pos){
-            controlPoint1 = new OrientedPoint(cp1Pos);
-            controlPoint2 = new OrientedPoint(cp2Pos);
-            handle1 = new OrientedPoint(h1Pos);
-            handle2 = new OrientedPoint(h2Pos);
-        }
-        public BezierCubic(OrientedPoint cp1Pos, OrientedPoint cp2Pos, OrientedPoint h1Pos, OrientedPoint h2Pos){
-            controlPoint1 = cp1Pos;
-            controlPoint2 = cp2Pos;
+        public BezierCubic(){;}
+        public BezierCubic(ControlPoint cp1, ControlPoint cp2, Vector3 h1Pos, Vector3 h2Pos) : base(cp1, cp2) {
             handle1 = h1Pos;
             handle2 = h2Pos;
         }
-        public BezierCubic(Transform cp1Pos, Transform cp2Pos, Transform h1Pos, Transform h2Pos){
-            controlPoint1 = new OrientedPoint(cp1Pos);
-            controlPoint2 = new OrientedPoint(cp2Pos);
-            handle1 = new OrientedPoint(h1Pos);
-            handle2 = new OrientedPoint(h2Pos);
+        public BezierCubic(Vector3 cp1Pos, Vector3 cp2Pos, Vector3 h1Pos, Vector3 h2Pos) : base(cp1Pos, cp2Pos) {
+            handle1 = h1Pos;
+            handle2 = h2Pos;
         }
+        public BezierCubic(Transform cp1, Transform cp2, Transform h1, Transform h2) : base(cp1, cp2) {
+            handle1 = h1.position;
+            handle2 = h2.position;
+        }
+        public BezierCubic(Transform cp1Pos, Transform cp2Pos, Vector3 h1, Vector3 h2) : base(cp1Pos, cp2Pos) {
+            handle1 = h1;
+            handle2 = h2;
+        }
+
 
 
 
         public override void Move(Vector3 direction){
             controlPoint1.position += direction;
             controlPoint2.position += direction;
-            handle1.position += direction;
-            handle2.position += direction;
+            handle1 += direction;
+            handle2 += direction;
         } 
 
         public override OrientedPoint GetPoint(float t){
-            Vector3 a = Vector3.Lerp(controlPoint1.position, handle1.position, t);
-            Vector3 b = Vector3.Lerp(handle1.position, handle2.position, t);
-            Vector3 c = Vector3.Lerp(handle2.position, controlPoint2.position, t);
+            Vector3 a = Vector3.Lerp(controlPoint1.position, handle1, t);
+            Vector3 b = Vector3.Lerp(handle1, handle2, t);
+            Vector3 c = Vector3.Lerp(handle2, controlPoint2.position, t);
 
             Vector3 d = Vector3.Lerp(a, b, t);
             Vector3 e = Vector3.Lerp(b, c, t);
             Vector3 f = Vector3.Lerp( d, e, t );
 
             Vector3 tForward = (e - d).normalized;
-            Vector3 tUp = Quaternion.Lerp(controlPoint1.rotation, controlPoint2.rotation, t) * Vector3.up;
-            Quaternion rotation = tForward == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation( tForward, tUp);
+            float upAngle = Mathf.Lerp(controlPoint1.upAngle, controlPoint2.upAngle, t); 
+            Vector3 tUp = Quaternion.AngleAxis(upAngle, tForward) * Vector3.up;
+            Quaternion rotation = Quaternion.LookRotation( tForward, tUp );
 
             return new OrientedPoint( f, rotation );
+        }
+
+        public override Vector3 GetTangent(float t){
+            Vector3 a = Vector3.Lerp(controlPoint1.position, handle1, t);
+            Vector3 b = Vector3.Lerp(handle1, handle2, t);
+            Vector3 c = Vector3.Lerp(handle2, controlPoint2.position, t);
+
+            Vector3 d = Vector3.Lerp(a, b, t);
+            Vector3 e = Vector3.Lerp(b, c, t);
+
+            return (e - d).normalized;
         }
 
         // public Vector3 GetVelocity(float t){
@@ -87,13 +85,6 @@ namespace SevenGame.Utility {
         //     Vector3 p3 = controlPoint2.position * ( 6f * t );
 
         //     return p0 + p1 + p2 + p3;
-        // }
-
-        // public Vector3 GetCurvature(float t){
-        //     Vector3 velo = GetVelocity(t);
-        //     Vector3 accel = GetAcceleration(t);
-
-        //     return ( Vector3.Dot() );
         // }
     }
 }
