@@ -199,16 +199,17 @@ namespace SevenGame.Utility {
             Segment previousSegment = previousSpline.segment;
 
             if (thisSegment is BezierCubic && previousSegment is BezierCubic) {
-                previousSpline.cp2.Set( previousSpline.transform.InverseTransform(transform.Transform(cp1)) );
-                previousSpline.h2 = previousSpline.cp2.position + (cp1.position - h1);
+                previousSpline.cp2.Set( previousSpline.transform.InverseTransform( transform.Transform(cp1) ) );
+                previousSpline.h2 = previousSpline.transform.InverseTransformPoint( previousSpline.transform.TransformPoint(previousSpline.cp2.position) + (transform.TransformPoint(cp1.position) - transform.TransformPoint(h1)) );
                 previousSpline.UpdateMesh();
             }
 
             if (thisSegment is BezierQuadratic && previousSegment is BezierQuadratic) {
-                previousSpline.cp2.Set( previousSpline.transform.InverseTransform(transform.Transform(cp1)) );
-                previousSpline.h = previousSpline.cp2.position + (cp1.position - h);
+                previousSpline.cp2.Set( previousSpline.transform.InverseTransform( transform.Transform(cp1) ) );
+                previousSpline.h = previousSpline.transform.InverseTransformPoint( previousSpline.transform.TransformPoint(previousSpline.cp2.position) + (transform.TransformPoint(cp1.position) - transform.TransformPoint(h)) );
                 previousSpline.UpdateMesh();
             }
+            
         }
 
         private void UpdateNextSegment() {
@@ -218,16 +219,17 @@ namespace SevenGame.Utility {
             Segment nextSegment = nextSpline.segment;
 
             if (thisSegment is BezierCubic && nextSegment is BezierCubic) {
-                nextSpline.cp1.Set( nextSpline.transform.InverseTransform(transform.Transform(cp2)) );
-                nextSpline.h1 = nextSpline.cp1.position + (cp2.position - h2);
+                nextSpline.cp1.Set( nextSpline.transform.InverseTransform( transform.Transform(cp2) ) );
+                nextSpline.h1 = nextSpline.transform.InverseTransformPoint( nextSpline.transform.TransformPoint(nextSpline.cp1.position) + (transform.TransformPoint(cp2.position) - transform.TransformPoint(h2)) );
                 nextSpline.UpdateMesh();
             }
 
             if (thisSegment is BezierQuadratic && nextSegment is BezierQuadratic) {
-                nextSpline.cp1.Set( nextSpline.transform.InverseTransform(transform.Transform(cp2)) );
-                nextSpline.h = nextSpline.cp2.position + (cp2.position - h);
+                nextSpline.cp1.Set( nextSpline.transform.InverseTransform( transform.Transform(cp2) ) );
+                nextSpline.h = nextSpline.transform.InverseTransformPoint( nextSpline.transform.TransformPoint(nextSpline.cp1.position) + (transform.TransformPoint(cp2.position) - transform.TransformPoint(h)) );
                 nextSpline.UpdateMesh();
             }
+
         }
 
 
