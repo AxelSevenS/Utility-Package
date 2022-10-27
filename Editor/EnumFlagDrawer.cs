@@ -27,10 +27,10 @@ namespace SevenGame.Utility {
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.BeginProperty(position, label, property);
 
-			Enum enumNew = EditorGUI.EnumMaskField(position, propName, targetEnum);
+			Enum enumNew = EditorGUI.EnumFlagsField(position, propName, targetEnum);
 
 			if (!property.hasMultipleDifferentValues || EditorGUI.EndChangeCheck())
-				property.intValue = (int)Convert.ChangeType(enumNew, targetEnum.GetType());
+				property.enumValueIndex = (int)Convert.ChangeType(enumNew, targetEnum.GetType());
 
 			EditorGUI.EndProperty();
 		}

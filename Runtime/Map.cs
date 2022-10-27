@@ -24,6 +24,14 @@ namespace SevenGame.Utility {
             }
         }
 
+        public TVal[] Values{
+            get {
+                TVal[] arr = new TVal[ pairs.Count ];
+                for (int i =0; i < arr.Length; i++) arr[i] = pairs[i].Value;
+                return arr;
+            }
+        }
+
         public bool Exists(TKey key){
             return GetIndex(key) != -1;
         }
