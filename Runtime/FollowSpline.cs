@@ -19,7 +19,6 @@ namespace SevenGame.Utility {
 
 
         private bool goingForward => movementDirection == MovementDirection.Forward;
-        private Spline nextSpline => goingForward ? spline.nextSpline : spline.previousSpline;
 
 
 
@@ -32,15 +31,31 @@ namespace SevenGame.Utility {
 
             float direction = (float)movementDirection;
 
-            if ( spline.hasStoppingPoint || nextSpline == null ) {
+            bool stoppingPointForward = spline.hasStoppingPoint && ((spline.stoppingPoint < t && movementDirection == MovementDirection.Backward) || (spline.stoppingPoint > t && movementDirection == MovementDirection.Forward));
+            bool endOfTheLine = goingForward ? spline.nextSpline == null : spline.previousSpline == null;
 
-                float stoppingPoint = spline.hasStoppingPoint ? spline.stoppingPoint : (goingForward ? 1f : 0f);
+            if ( stoppingPointForward || endOfTheLine ) {
 
-                float slowT = goingForward ? 
-                    t / stoppingPoint : 
-                    (1f - t) / (1f - stoppingPoint);
+                // When at the end of the line or at the stopping point, slow down
+                float stoppingPoint = stoppingPointForward ? spline.stoppingPoint : (goingForward ? 1f : 0f);
+
+                float slowT = goingForward ? t / stoppingPoint : (1f - t) / (1f - stoppingPoint);
                 
                 moveSpeed = Mathf.Lerp(maxSpeedOnSlowDown, 0f, slowT);
+
+
+
+                bool reachedStoppingPoint = Mathf.Abs(t - stoppingPoint) < 0.01f;
+
+                if (reachedStoppingPoint) {
+                    if (stoppingPointForward) {
+                        // If at the stopping point, slow down and stop, then continue
+                        t = stoppingPoint;
+                    } else {
+                        // If at the end of the line, stop and turn around
+                        movementDirection = (MovementDirection)(-(int)movementDirection);
+                    }
+                }
 
             } else {
 
@@ -56,11 +71,11 @@ namespace SevenGame.Utility {
 
 
             // If the object has reached the end of the spline, go to the next one
-            while ( goingForward && t > 1f && nextSpline != null) {
+            while ( goingForward && t > 1f && spline.nextSpline != null) {
                 spline = spline.nextSpline;
                 t -= 1f;
             }
-            while ( !goingForward && t < 0f && nextSpline != null) {
+            while ( !goingForward && t < 0f && spline.previousSpline != null) {
                 spline = spline.previousSpline;
                 t += 1f;
             }
