@@ -19,18 +19,15 @@ namespace SevenGame.Utility {
 			EnumFlagAttribute flagSettings = (EnumFlagAttribute)attribute;
 			Enum targetEnum = (Enum)Enum.ToObject(fieldInfo.FieldType, property.intValue);
 
-			// string propName = flagSettings.displayName;
-			// if (string.IsNullOrEmpty(propName))
-			// 	propName = ObjectNames.NicifyVariableName(property.name);
 			string propName = string.IsNullOrEmpty(flagSettings.displayName) ? ObjectNames.NicifyVariableName(property.name) : flagSettings.displayName;
 
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.BeginProperty(position, label, property);
 
-			Enum enumNew = EditorGUI.EnumFlagsField(position, propName, targetEnum);
+			int newValue = EditorGUI.MaskField(position, label, property.intValue, property.enumNames);
 
 			if (!property.hasMultipleDifferentValues || EditorGUI.EndChangeCheck())
-				property.enumValueIndex = (int)Convert.ChangeType(enumNew, targetEnum.GetType());
+				property.intValue = newValue;
 
 			EditorGUI.EndProperty();
 		}
