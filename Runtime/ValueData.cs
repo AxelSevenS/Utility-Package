@@ -93,19 +93,16 @@ namespace SevenGame.Utility {
     public struct BoolData : ValueData<bool> {
         public bool currentValue;
         public bool lastValue;
+        public bool started => currentValue && !lastValue;
+        public bool stopped => !currentValue && lastValue;
 
         public Timer trueTimer;
         public Timer falseTimer;
-        public bool started;
-        public bool stopped;
 
         public static implicit operator bool(BoolData data) => data.currentValue;
         public void SetVal(bool value){
             lastValue = currentValue;
             currentValue = value;
-
-            started = currentValue && !lastValue;
-            stopped = !currentValue && lastValue;
 
             if (currentValue) falseTimer.Start();
             else trueTimer.Start();
@@ -114,18 +111,19 @@ namespace SevenGame.Utility {
 
     [System.Serializable]
     public struct KeyInputData : ValueData<bool> {
-        public bool currentValue;
-        public bool lastValue;
 
         private const float HOLD_TIME = 0.15f;
 
+
+        public bool currentValue;
+        public bool lastValue;
+        public bool started => currentValue && !lastValue;
+        public bool stopped => !currentValue && lastValue;
+        public bool tapped => stopped && trueTimer < HOLD_TIME;
+        public bool held => currentValue && trueTimer > HOLD_TIME;
+
         public Timer trueTimer;
         public Timer falseTimer;
-        public bool started;
-        public bool stopped;
-
-        public bool tapped;
-        public bool held;
 
         public static implicit operator bool(KeyInputData data) => data.currentValue;
 
@@ -138,12 +136,6 @@ namespace SevenGame.Utility {
         public void SetVal(bool value){
             lastValue = currentValue;
             currentValue = value;
-
-            started = currentValue && !lastValue;
-            stopped = !currentValue && lastValue;
-
-            tapped = stopped && trueTimer < HOLD_TIME; 
-            held = currentValue && trueTimer > HOLD_TIME; 
 
             if (currentValue) falseTimer.Start();
             else trueTimer.Start();

@@ -3,7 +3,7 @@ using UnityEditor;
 
 using SevenGame.Utility;
 
-namespace SevenGame.Utility.Editor {
+namespace SevenGame.Utility {
 
     [CustomPropertyDrawer( typeof( ValuePair ), true )]
     public class ValuePairDrawer : PropertyDrawer {

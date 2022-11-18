@@ -5,7 +5,7 @@ using SevenGame.Utility;
 
 namespace SevenGame.Utility.Editor {
 
-    [CustomPropertyDrawer( typeof( Map ), true )]
+    [CustomPropertyDrawer(typeof( Map ), true )]
     public class MapDrawer : PropertyDrawer {
 
         public override void OnGUI( Rect position, SerializedProperty property, GUIContent label ) {

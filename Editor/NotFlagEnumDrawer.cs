@@ -29,7 +29,6 @@ namespace SevenGame.Utility.Editor {
 
 			if (!property.hasMultipleDifferentValues || EditorGUI.EndChangeCheck()) {
                 int value = Convert.ToInt32(newValue);
-                Debug.Log(value);
                 property.intValue = value;
             }
 
