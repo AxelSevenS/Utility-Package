@@ -35,6 +35,9 @@ namespace SevenGame.Utility.Editor {
                 _list.drawHeaderCallback = (Rect rect) => {
                     EditorGUI.LabelField(rect, property.displayName);
                 };
+                _list.drawNoneElementCallback = (Rect rect) => {
+                    EditorGUI.LabelField(rect, "Dictionary is Empty");
+                };
                 _list.drawElementCallback = (UnityEngine.Rect rect, int index, bool isActive, bool isFocused) => {
                     rect.width -= 10;
                     rect.x += 10;
@@ -61,15 +64,17 @@ namespace SevenGame.Utility.Editor {
             Rect foldoutPosition = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
 
             showContents = EditorGUI.BeginFoldoutHeaderGroup(foldoutPosition, showContents, property.displayName);
-                if (showContents) {
+            if (showContents) {
+                if (pairsProperty.arraySize != 0) {
                     var height = 0f;
                     for(var i = 0; i < pairsProperty.arraySize; i++) {
                         height = Mathf.Max(height, EditorGUI.GetPropertyHeight(pairsProperty.GetArrayElementAtIndex(i)));
                     }
                     reorderableList.elementHeight = height;
-                    foldoutPosition.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                    reorderableList.DoList(foldoutPosition);
                 }
+                foldoutPosition.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+                reorderableList.DoList(foldoutPosition);
+            }
             EditorGUI.EndFoldoutHeaderGroup();
 
             EditorGUI.EndProperty();
