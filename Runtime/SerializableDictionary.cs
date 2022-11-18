@@ -1,12 +1,12 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 
-using SevenGame.Utility;
-using System.Linq;
 
-namespace SeleneGame.Core {
+namespace SevenGame.Utility {
 
     public abstract class SerializableDictionary {}
 

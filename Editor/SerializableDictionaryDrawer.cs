@@ -1,13 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
-using System;
 
-using SevenGame.Utility.Editor;
 
-namespace SeleneGame.Core {
+namespace SevenGame.Utility.Editor {
 
     [CustomPropertyDrawer(typeof(SerializableDictionary), true)]
     public class SerializableDictionaryDrawer : PropertyDrawer {
