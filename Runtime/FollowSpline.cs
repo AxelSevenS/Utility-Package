@@ -6,25 +6,41 @@ namespace SevenGame.Utility {
     
     public class FollowSpline : MonoBehaviour{
 
-        [SerializeField] private float maxSpeed;
-        [SerializeField] private float moveSpeed;
         [SerializeField] private MovementDirection movementDirection;
 
         [SerializeField] private Spline spline;
         private OrientedPoint splinePosition;
-        [Range(0, 1f)] [SerializeField] private float weight = 0.5f;
+        [SerializeField] private float maxSpeed;
+        [SerializeField] private float moveSpeed = 0;
+        [SerializeField] private float acceleration = 0.5f;
         [Range(0, 1f)] [SerializeField] private float t;
 
-        private float maxSpeedOnSlowDown;
+        [SerializeField] private float currentVelocity;
 
 
         private bool goingForward => movementDirection == MovementDirection.Forward;
 
 
+        private async void TurnBack() {
+            MovementDirection oldDirection = movementDirection;
+            movementDirection = MovementDirection.None;
 
-        void FixedUpdate(){
+            await System.Threading.Tasks.Task.Delay(3000);
+
+            movementDirection = (MovementDirection)(-(int)oldDirection);
+        }
+
+        private async void StopAtStoppingPoint() {
+            MovementDirection oldDirection = movementDirection;
+            movementDirection = MovementDirection.None;
+
+            await System.Threading.Tasks.Task.Delay(3000);
+
+            movementDirection = oldDirection;
+        }
+
+        private void FixedUpdate(){
             if (movementDirection == MovementDirection.None) {
-                maxSpeedOnSlowDown = 0f;
                 return;
             }
 
@@ -39,30 +55,27 @@ namespace SevenGame.Utility {
                 // When at the end of the line or at the stopping point, slow down
                 float stoppingPoint = stoppingPointForward ? spline.stoppingPoint : (goingForward ? 1f : 0f);
 
-                float slowT = goingForward ? t / stoppingPoint : (1f - t) / (1f - stoppingPoint);
-                
-                moveSpeed = Mathf.Lerp(maxSpeedOnSlowDown, 0f, slowT);
-
+                // t = Mathf.SmoothStep(t, stoppingPoint, moveSpeed * GameUtility.timeDelta);
+                moveSpeed = Mathf.SmoothStep(moveSpeed, Mathf.Abs(t - stoppingPoint), moveSpeed * GameUtility.timeDelta);
 
 
                 bool reachedStoppingPoint = Mathf.Abs(t - stoppingPoint) < 0.01f;
 
                 if (reachedStoppingPoint) {
+                    t = stoppingPoint;
                     if (stoppingPointForward) {
-                        // If at the stopping point, slow down and stop, then continue
-                        t = stoppingPoint;
+                        // If at the stopping point, start moving again
+                        StopAtStoppingPoint();
                     } else {
                         // If at the end of the line, stop and turn around
-                        movementDirection = (MovementDirection)(-(int)movementDirection);
+                        TurnBack();
+                        // movementDirection = (MovementDirection)(-(int)movementDirection);
                     }
                 }
 
             } else {
-
-                // moveSpeed = Mathf.MoveTowards(moveSpeed, maxSpeed, (1f - weight) * GameUtility.timeDelta);
-                moveSpeed = maxSpeed;
-                maxSpeedOnSlowDown = moveSpeed;
-                
+                // If not at the end of the line or at the stopping point, move at the set speed
+                moveSpeed = Mathf.SmoothStep(moveSpeed, maxSpeed, acceleration * GameUtility.timeDelta);
             }
 
             // Move along spline
