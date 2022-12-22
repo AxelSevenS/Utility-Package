@@ -51,8 +51,8 @@ namespace SevenGame.Utility {
 
         public abstract Vector3 GetTangent(float t);
 
-        // public abstract void UpdateNextSegment( Segment nextSegment );
-        // public abstract void UpdatePreviousSegment( Segment previousSegment );
+        public abstract void UpdateNextSegment( Segment nextSegment );
+        public abstract void UpdatePreviousSegment( Segment previousSegment );
 
         public virtual void UpdateLength() {
 

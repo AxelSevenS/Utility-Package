@@ -68,6 +68,22 @@ namespace SevenGame.Utility {
             return (e - d).normalized;
         }
 
+        public override void UpdateNextSegment(Segment nextSegment) {
+            if (nextSegment == null || !(nextSegment is BezierCubic nextCubic))
+                return;
+            
+            nextCubic.controlPoint1.Set( this.controlPoint2 );
+            nextCubic.handle1 = (nextCubic.controlPoint1.position * 2) - this.handle2;
+        }
+
+        public override void UpdatePreviousSegment(Segment previousSegment) {
+            if (previousSegment == null || !(previousSegment is BezierCubic previousCubic))
+                return;
+            
+            previousCubic.controlPoint2.Set( this.controlPoint1 );
+            previousCubic.handle2 = (previousCubic.controlPoint2.position * 2) - this.handle1;
+        }
+
         // public Vector3 GetVelocity(float t){
         //     float tPow2 = Mathf.Pow(t, 2f);
         //     Vector3 p0 = controlPoint1.position * ( (-3f * tPow2) + (6f * t) - 3f );

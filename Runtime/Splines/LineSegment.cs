@@ -35,5 +35,20 @@ namespace SevenGame.Utility {
 
         public override float GetUniformT(float t) => t;
 
+
+        public override void UpdateNextSegment(Segment nextSegment) {
+            if (nextSegment == null || !(nextSegment is LineSegment))
+                return;
+
+            nextSegment.controlPoint1.Set( this.controlPoint2 );
+        }
+
+        public override void UpdatePreviousSegment(Segment previousSegment) {
+            if (previousSegment == null || !(previousSegment is LineSegment))
+                return;
+
+            previousSegment.controlPoint2.Set( this.controlPoint1 );
+        }
+
     }
 }

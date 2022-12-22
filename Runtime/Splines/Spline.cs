@@ -75,9 +75,9 @@ namespace SevenGame.Utility {
 
 
 
-        public OrientedPoint GetPoint(float tVal) => transform.Transform( segment.GetPoint(tVal) );
-        public OrientedPoint GetPointUniform(float tVal) => transform.Transform( segment.GetPoint( segment.GetUniformT(tVal) ) );
-        public Vector3 GetTangent(float tVal) => transform.TransformDirection( segment.GetTangent(tVal) );
+        public OrientedPoint GetPoint(float tVal) => segment.GetPoint(tVal);
+        public OrientedPoint GetPointUniform(float tVal) => segment.GetPoint( segment.GetUniformT(tVal) );
+        public Vector3 GetTangent(float tVal) => segment.GetTangent(tVal);
 
         public void UpdateMesh(){
 
@@ -157,52 +157,32 @@ namespace SevenGame.Utility {
             UpdatePreviousSegment();
         }
 
+        private void UpdateNextSegment() {
+            if (nextSpline == null) return;
+            
+            Segment thisSegment = this.segment;
+            Segment nextSegment = nextSpline.segment;
+
+            if (nextSegment.GetType() == thisSegment.GetType()) {
+                thisSegment.UpdateNextSegment(nextSegment);
+            }
+
+            nextSpline.UpdateMesh();
+
+        }
+
         private void UpdatePreviousSegment() {
             if (previousSpline == null) return;
 
             Segment thisSegment = this.segment;
             Segment previousSegment = previousSpline.segment;
 
-            previousSegment.controlPoint2.Set( previousSpline.transform.InverseTransform( transform.Transform(thisSegment.controlPoint1) ) );
-
-            if (thisSegment is BezierCubic thisCubic && previousSegment is BezierCubic previousCubic) {
-                Vector3 cpPosition = previousSpline.transform.TransformPoint(previousCubic.controlPoint2.position);
-                Vector3 displacement = previousSpline.transform.InverseTransformPoint( transform.TransformDirection(thisCubic.controlPoint1.position - thisCubic.handle1) );
-                previousCubic.handle2 = cpPosition + displacement;
-            }
-
-            if (thisSegment is BezierQuadratic thisQuadratic && previousSegment is BezierQuadratic previousQuadratic) {
-                Vector3 cpPosition = previousSpline.transform.TransformPoint(previousQuadratic.controlPoint2.position);
-                Vector3 displacement = previousSpline.transform.InverseTransformPoint( transform.TransformDirection(thisQuadratic.controlPoint1.position - thisQuadratic.handle) );
-                previousQuadratic.handle = cpPosition + displacement;
+            if (previousSegment.GetType() == thisSegment.GetType()) {
+                thisSegment.UpdatePreviousSegment(previousSegment);
             }
 
             previousSpline.UpdateMesh();
             
-        }
-
-        private void UpdateNextSegment() {
-            if (nextSpline == null) return;
-            
-            Segment thisSegment = this.segment;
-            Segment nextSegment = nextSpline.segment;
-            
-            nextSegment.controlPoint1.Set( nextSpline.transform.InverseTransform( transform.Transform(thisSegment.controlPoint2) ) );
-
-            if (thisSegment is BezierCubic thisCubic && nextSegment is BezierCubic nextCubic) {
-                Vector3 cpPosition = nextSpline.transform.TransformPoint(nextCubic.controlPoint1.position);
-                Vector3 displacement = nextSpline.transform.InverseTransformPoint( transform.TransformDirection(thisCubic.controlPoint2.position - thisCubic.handle2) );
-                nextCubic.handle1 = cpPosition + displacement;
-            }
-
-            if (thisSegment is BezierQuadratic thisQuadratic && nextSegment is BezierQuadratic nextQuadratic) {
-                Vector3 cpPosition = nextSpline.transform.TransformPoint(nextQuadratic.controlPoint1.position);
-                Vector3 displacement = nextSpline.transform.InverseTransformPoint( transform.TransformDirection(thisQuadratic.controlPoint2.position - thisQuadratic.handle) );
-                nextQuadratic.handle = cpPosition + displacement;
-            }
-
-            nextSpline.UpdateMesh();
-
         }
 
 

@@ -52,6 +52,22 @@ namespace SevenGame.Utility {
             return (b - a).normalized;
         }
 
+        public override void UpdateNextSegment(Segment nextSegment) {
+            if (nextSegment == null || !(nextSegment is BezierQuadratic nextQuadratic))
+                return;
+
+            nextQuadratic.controlPoint1.Set( this.controlPoint2 );
+            nextQuadratic.handle = (nextQuadratic.controlPoint1.position * 2) - this.handle;
+        }
+
+        public override void UpdatePreviousSegment(Segment previousSegment) {
+            if (previousSegment == null || !(previousSegment is BezierQuadratic previousQuadratic))
+                return;
+
+            previousQuadratic.controlPoint2.Set( this.controlPoint1 );
+            previousQuadratic.handle = (previousQuadratic.controlPoint2.position * 2) - this.handle;
+        }
+
         // public override void UpdateNextSegment( BezierQuadratic nextSegment ){}
         // public override void UpdatePreviousSegment( BezierQuadratic previousSegment ){}
     }

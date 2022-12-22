@@ -15,10 +15,10 @@ namespace SevenGame.Utility {
 
         
         public static ControlPoint Transform(this Transform transform, ControlPoint orientedPoint){
-            return new ControlPoint(transform.TransformPoint(orientedPoint.position), transform.TransformDirection(orientedPoint.forward), orientedPoint.upAngle);
+            return new ControlPoint(transform.TransformPoint(orientedPoint.position)/* , transform.TransformDirection(orientedPoint.forward) */, orientedPoint.upAngle);
         }
         public static ControlPoint InverseTransform(this Transform transform, ControlPoint orientedPoint){
-            return new ControlPoint(transform.InverseTransformPoint(orientedPoint.position), transform.InverseTransformDirection(orientedPoint.forward), orientedPoint.upAngle);
+            return new ControlPoint(transform.InverseTransformPoint(orientedPoint.position)/* , transform.InverseTransformDirection(orientedPoint.forward) */, orientedPoint.upAngle);
         }
 
 
