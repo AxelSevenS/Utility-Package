@@ -21,7 +21,7 @@ namespace SevenGame.Utility {
         private bool goingForward => movementDirection == MovementDirection.Forward;
 
 
-        private async void TurnBack() {
+        protected virtual async void StopAndTurnBack() {
             MovementDirection oldDirection = movementDirection;
             movementDirection = MovementDirection.None;
 
@@ -30,7 +30,7 @@ namespace SevenGame.Utility {
             movementDirection = (MovementDirection)(-(int)oldDirection);
         }
 
-        private async void StopAtStoppingPoint() {
+        protected virtual async void StopAndContinue() {
             MovementDirection oldDirection = movementDirection;
             movementDirection = MovementDirection.None;
 
@@ -65,11 +65,10 @@ namespace SevenGame.Utility {
                     t = stoppingPoint;
                     if (stoppingPointForward) {
                         // If at the stopping point, start moving again
-                        StopAtStoppingPoint();
+                        StopAndContinue();
                     } else {
                         // If at the end of the line, stop and turn around
-                        TurnBack();
-                        // movementDirection = (MovementDirection)(-(int)movementDirection);
+                        StopAndTurnBack();
                     }
                 }
 
@@ -97,8 +96,8 @@ namespace SevenGame.Utility {
             // Move
             splinePosition = spline.GetPointUniform(t);
 
-            transform.position = Vector3.Lerp(transform.position, splinePosition.position, GameUtility.timeDelta);
-            transform.rotation = Quaternion.Slerp(transform.rotation, splinePosition.rotation, GameUtility.timeDelta);
+            transform.position = Vector3.Lerp(transform.position, splinePosition.position, 5f * GameUtility.timeDelta);
+            transform.rotation = Quaternion.Slerp(transform.rotation, splinePosition.rotation, 5f * GameUtility.timeDelta);
         }
 
 
