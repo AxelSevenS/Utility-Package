@@ -48,7 +48,7 @@ namespace SevenGame.Utility.Editor {
                     list.serializedProperty.arraySize++;
                     list.index = index;
                     var element = list.serializedProperty.GetArrayElementAtIndex(index);
-                    SerializedPropertyUtility.ResetValue(element.FindPropertyRelative("Key"));
+                    SevenEditorUtility.ResetValue(element.FindPropertyRelative("Key"));
                 };
             }
             return _list;
