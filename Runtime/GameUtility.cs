@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace SevenGame.Utility {
     public static class GameUtility {
@@ -11,10 +10,6 @@ namespace SevenGame.Utility {
         
         public static float timeDelta => Time.inFixedTimeStep ? Time.fixedDeltaTime : Time.deltaTime;
         public static float timeUnscaledDelta => Time.inFixedTimeStep ? Time.fixedUnscaledDeltaTime : Time.unscaledDeltaTime;
-
-
-        public static bool IsBindPressed(this InputActionMap controlMap, string bindName) => controlMap[bindName].ReadValue<float>() > 0;
-        public static bool IsActuated(this InputAction action) => action.ReadValue<float>() > 0;
 
         public static string Nicify(this string t){
             
