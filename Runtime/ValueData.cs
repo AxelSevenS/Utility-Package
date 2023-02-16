@@ -101,11 +101,11 @@ namespace SevenGame.Utility {
 
         public static implicit operator bool(BoolData data) => data.currentValue;
         public void SetVal(bool value){
-            lastValue = currentValue;
-            currentValue = value;
-
             if (currentValue) falseTimer.Start();
             else trueTimer.Start();
+
+            lastValue = currentValue;
+            currentValue = value;
         }
     }
 
@@ -119,26 +119,32 @@ namespace SevenGame.Utility {
         public bool lastValue;
         public bool started => currentValue && !lastValue;
         public bool stopped => !currentValue && lastValue;
-        public bool tapped => stopped && trueTimer < HOLD_TIME;
-        public bool held => currentValue && trueTimer > HOLD_TIME;
 
         public Timer trueTimer;
         public Timer falseTimer;
 
         public static implicit operator bool(KeyInputData data) => data.currentValue;
 
+
+        public bool Tapped(float time = HOLD_TIME) => stopped && trueTimer < time;
+        public bool Held(float time = HOLD_TIME) => currentValue && trueTimer > time;
+
         public static bool SimultaneousTap(KeyInputData a, KeyInputData b, float time = HOLD_TIME) {
-            bool aTapped = a.trueTimer < time && a && b.started;
-            bool bTapped = b.trueTimer < time && b && a.started;
+            bool aTapped = a.trueTimer < time && b.started;
+            bool bTapped = b.trueTimer < time && a.started;
             return aTapped || bTapped;
+        }
+
+        public bool SimultaneousTap(KeyInputData other, float time = HOLD_TIME) {
+            return SimultaneousTap(this, other, time);
         }
         
         public void SetVal(bool value){
-            lastValue = currentValue;
-            currentValue = value;
-
             if (currentValue) falseTimer.Start();
             else trueTimer.Start();
+
+            lastValue = currentValue;
+            currentValue = value;
         }
 
     }
