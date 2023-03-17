@@ -4,11 +4,16 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
+	/// <summary>
+	/// <para>
+	/// Used to draw a Flags Enum as a regular unary Enum and to disallow the use of flags, even if it's marked as a Flags Enum.
+	/// </para>
+	/// <para>
+	/// Useful if you want a Flag Enum value to only have one value at a time.
+	/// </para>
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	public class NotFlagEnumAttribute : PropertyAttribute {
-
-		// Used to draw an Enum Flag as a regular dropdown Enum; Use this to disallow the use of flags on an Enum, even if it's marked as a Flags Enum
-		// Useful if you want a Flag Enum value to only have one value at a time.
 
 		public string displayName;
 

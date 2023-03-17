@@ -5,11 +5,12 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace SevenGame.Utility {
+
     public static class GameUtility {
-        
         
         public static float timeDelta => Time.inFixedTimeStep ? Time.fixedDeltaTime : Time.deltaTime;
         public static float timeUnscaledDelta => Time.inFixedTimeStep ? Time.fixedUnscaledDeltaTime : Time.unscaledDeltaTime;
+
 
         public static string Nicify(this string t){
             

@@ -5,7 +5,7 @@ using SevenGame.Utility;
 
 namespace SevenGame.Utility {
 
-    [CustomPropertyDrawer( typeof( ValuePair ), true )]
+    [CustomPropertyDrawer( typeof( IValuePair ), true )]
     public class ValuePairDrawer : PropertyDrawer {
 
         public override void OnGUI( Rect position, SerializedProperty property, GUIContent label ) {

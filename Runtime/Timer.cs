@@ -20,12 +20,12 @@ namespace SevenGame.Utility {
     }
 
     [System.Serializable]
-    public struct TimeUntil {
+    public struct TimeInterval {
         public float stopTime;
         public bool isDone => Time.time >= stopTime;
         public float duration => isDone ? 0f : stopTime - Time.time;
 
-        public static implicit operator float(TimeUntil timeUntil) => timeUntil.duration;
+        public static implicit operator float(TimeInterval timeUntil) => timeUntil.duration;
 
         public void SetTime(float time){
             stopTime = time;

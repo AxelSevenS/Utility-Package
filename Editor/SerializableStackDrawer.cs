@@ -9,46 +9,39 @@ using UnityEditorInternal;
 
 namespace SevenGame.Utility.Editor {
 
-    [CustomPropertyDrawer(typeof(ISerializableDictionary), true)]
-    public class SerializableDictionaryDrawer : PropertyDrawer {
+    [CustomPropertyDrawer(typeof(ISerializableStack), true)]
+    public class SerializableStackDrawer : PropertyDrawer {
 
-        private SerializedProperty _pairs = null;
+        private SerializedProperty _values = null;
         private ReorderableList _list = null;
 
         private bool showContents = true;
 
 
 
-        private SerializedProperty GetPairs(SerializedProperty property){
-            if (_pairs == null) {
-                _pairs = property.FindPropertyRelative("_pairs");
+        private SerializedProperty GetValues(SerializedProperty property){
+            if (_values == null) {
+                _values = property.FindPropertyRelative("_values");
             }
-            return _pairs;
+            return _values;
         }
 
         private ReorderableList GetReorderableList(SerializedProperty property){
             
-            var pairsProperty = GetPairs(property);
+            var valuesProperty = GetValues(property);
 
             if (_list == null) {
-                _list = new ReorderableList(pairsProperty.serializedObject, pairsProperty, true, false, true, true);
+                _list = new ReorderableList(valuesProperty.serializedObject, valuesProperty, true, false, true, true);
                 _list.drawHeaderCallback = (Rect rect) => {
                     EditorGUI.LabelField(rect, property.displayName);
                 };
                 _list.drawNoneElementCallback = (Rect rect) => {
-                    EditorGUI.LabelField(rect, "Dictionary is Empty");
+                    EditorGUI.LabelField(rect, "Stack is Empty");
                 };
                 _list.drawElementCallback = (UnityEngine.Rect rect, int index, bool isActive, bool isFocused) => {
                     rect.width -= 10;
                     rect.x += 10;
-                    EditorGUI.PropertyField(rect, pairsProperty.GetArrayElementAtIndex(index), true);
-                };
-                _list.onAddCallback = (ReorderableList list) => {
-                    var index = list.serializedProperty.arraySize;
-                    list.serializedProperty.arraySize++;
-                    list.index = index;
-                    var element = list.serializedProperty.GetArrayElementAtIndex(index);
-                    SevenEditorUtility.ResetValue(element.FindPropertyRelative("Key"));
+                    EditorGUI.PropertyField(rect, valuesProperty.GetArrayElementAtIndex(index), true);
                 };
             }
             return _list;
@@ -58,7 +51,7 @@ namespace SevenGame.Utility.Editor {
         public override void OnGUI( Rect position, SerializedProperty property, GUIContent label ) {
             EditorGUI.BeginProperty( position, label, property );
 
-            var pairsProperty = GetPairs(property);
+            var pairsProperty = GetValues(property);
             var reorderableList = GetReorderableList(property);
             
             Rect foldoutPosition = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);

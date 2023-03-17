@@ -8,10 +8,12 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    public abstract class SerializableDictionary {}
+    #if UNITY_EDITOR
+
+    internal interface ISerializableDictionary : ISerializationCallbackReceiver, IEnumerable {}
 
     [System.Serializable]
-    public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver {
+    public class SerializableDictionary<TKey, TValue> : ISerializableDictionary, IDictionary<TKey, TValue> {
 
         [SerializeField] private List<ValuePair<TKey, TValue>> _pairs = new List<ValuePair<TKey, TValue>>();
         private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
@@ -103,5 +105,12 @@ namespace SevenGame.Utility {
             }
         }
     }
+
+    #else
+
+    [System.Serializable]
+    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue> {}
+
+    #endif
 
 }
