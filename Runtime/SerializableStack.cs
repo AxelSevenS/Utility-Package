@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    #if UNITY_EDITOR
-
     internal interface ISerializableStack : ISerializationCallbackReceiver, IEnumerable {}
 
     [System.Serializable]
@@ -20,6 +18,16 @@ namespace SevenGame.Utility {
 
         public int Count => _stack.Count;
         
+
+        public SerializableStack() {
+            _stack = new Stack<TValue>();
+        }
+        public SerializableStack(IEnumerable<TValue> collection) {
+            _stack = new Stack<TValue>(collection);
+        }
+        public SerializableStack(int capacity) {
+            _stack = new Stack<TValue>(capacity);
+        }
 
 
         public void Clear() {
@@ -87,11 +95,5 @@ namespace SevenGame.Utility {
             }
         }
     }
-
-    #else
-
-    [System.Serializable]
-    public class SerializableStack<TValue> : Stack<TValue> {}
-
-    #endif
+    
 }

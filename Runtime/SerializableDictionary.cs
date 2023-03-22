@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    #if UNITY_EDITOR
-
     internal interface ISerializableDictionary : ISerializationCallbackReceiver, IEnumerable {}
 
     [System.Serializable]
@@ -105,12 +103,5 @@ namespace SevenGame.Utility {
             }
         }
     }
-
-    #else
-
-    [System.Serializable]
-    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue> {}
-
-    #endif
 
 }
