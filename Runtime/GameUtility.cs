@@ -31,7 +31,7 @@ namespace SevenGame.Utility {
         }
 
         public static T SafeDestroy<T>(T obj) where T : Object{
-            if (Application.isEditor)
+            if (!Application.isPlaying)
                 Object.DestroyImmediate(obj);
             else
                 Object.Destroy(obj);
