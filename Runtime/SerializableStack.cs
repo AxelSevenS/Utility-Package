@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    internal interface ISerializableStack : ISerializationCallbackReceiver, IEnumerable {}
-
     [System.Serializable]
-    public class SerializableStack<TValue> : ISerializableStack, IEnumerable<TValue>, IReadOnlyCollection<TValue> {
+    public class SerializableStack<TValue> : ISerializationCallbackReceiver, IEnumerable, IEnumerable<TValue>, IReadOnlyCollection<TValue> {
 
         [SerializeField] private List<TValue> _values = new List<TValue>();
         private Stack<TValue> _stack = new Stack<TValue>();

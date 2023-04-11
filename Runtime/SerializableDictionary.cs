@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    internal interface ISerializableDictionary : ISerializationCallbackReceiver, IEnumerable {}
-
     [System.Serializable]
-    public class SerializableDictionary<TKey, TValue> : ISerializableDictionary, IDictionary<TKey, TValue> {
+    public class SerializableDictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable, IDictionary<TKey, TValue> {
 
         [SerializeField] private List<ValuePair<TKey, TValue>> _pairs = new List<ValuePair<TKey, TValue>>();
         private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();

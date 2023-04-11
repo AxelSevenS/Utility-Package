@@ -2,10 +2,11 @@ using UnityEngine;
 using UnityEditor;
 
 using SevenGame.Utility;
+using System.Collections.Generic;
 
 namespace SevenGame.Utility {
 
-    [CustomPropertyDrawer( typeof( IValuePair ), true )]
+    [CustomPropertyDrawer( typeof( ValuePair<,> ), true )]
     public class ValuePairDrawer : PropertyDrawer {
 
         public override void OnGUI( Rect position, SerializedProperty property, GUIContent label ) {

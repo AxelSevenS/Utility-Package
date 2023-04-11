@@ -9,7 +9,7 @@ using UnityEditorInternal;
 
 namespace SevenGame.Utility.Editor {
 
-    [CustomPropertyDrawer(typeof(ISerializableStack), true)]
+    [CustomPropertyDrawer(typeof(SerializableStack<>), true)]
     public class SerializableStackDrawer : PropertyDrawer {
 
         private SerializedProperty _values = null;
