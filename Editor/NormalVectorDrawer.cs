@@ -6,7 +6,7 @@ using UnityEngine;
 namespace SevenGame.Utility.Editor {
 
     [CustomPropertyDrawer(typeof( NormalVectorAttribute ), true)]
-    public class ReadOnlyDrawer : PropertyDrawer {
+    public class NormalVectorDrawer : PropertyDrawer {
 
         public override void OnGUI( Rect position, SerializedProperty property, GUIContent label ) {
             EditorGUI.BeginProperty( position, label, property );
