@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace SevenGame.Utility {
+namespace SevenGame.Utility.Editor {
 	
 	[CustomPropertyDrawer(typeof(EnumFlagAttribute))]
 	public class EnumFlagDrawer : PropertyDrawer {

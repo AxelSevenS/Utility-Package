@@ -122,8 +122,8 @@ float Dither(float2 ScreenPosition) {
     return 1 - DITHER_THRESHOLDS[index];
 }
 
-bool ProximityDither(float3 worldPosition, float4 screenPosition) {
-    float proximityAlphaMultiplier = (distance(_WorldSpaceCameraPos, worldPosition) - 0.25) * 3;
+bool ProximityDither(float3 worldPosition, float4 screenPosition, float ditherDistance = 0.2) {
+    float proximityAlphaMultiplier = (distance(_WorldSpaceCameraPos, worldPosition) - 0.25) / ditherDistance;
 
     float ditherMask = Dither( screenPosition.xy / screenPosition.w );
     bool shouldClip = ditherMask <= 1 - proximityAlphaMultiplier;
