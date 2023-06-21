@@ -7,19 +7,19 @@ namespace SevenGame.Utility {
     public static class Collision {
 
         public static bool ColliderCast( this Collider collider, Vector3 position, Vector3 direction, out RaycastHit hit, float skinThickness, LayerMask layerMask ){
+            float skinThicknessOrEpsilon = Mathf.Max(skinThickness, Mathf.Epsilon);
             if ( collider is CapsuleCollider capsule) {
 
-                capsule.GetCapsuleInfo( position, skinThickness, out Vector3 startPos, out Vector3 endPos, out float radius );
-                return Physics.CapsuleCast( startPos, endPos, radius, direction.normalized, out hit, direction.magnitude + skinThickness, layerMask );
-            }else if ( collider is SphereCollider sphere) {
+                capsule.GetCapsuleInfo( position, skinThicknessOrEpsilon, out Vector3 startPos, out Vector3 endPos, out float radius );
+                return Physics.CapsuleCast( startPos, endPos, radius, direction.normalized, out hit, direction.magnitude + skinThicknessOrEpsilon, layerMask );
+            } else if ( collider is SphereCollider sphere) {
 
-                float skinnedRadius = sphere.radius - Mathf.Min(skinThickness, sphere.radius - 0.01f);
-                return Physics.SphereCast( sphere.transform.position, skinnedRadius, direction, out hit, direction.magnitude + skinnedRadius, layerMask );
-            }else if ( collider is BoxCollider box) {
+                return Physics.SphereCast( sphere.transform.position + position, sphere.radius - skinThicknessOrEpsilon, direction.normalized, out hit, direction.magnitude + skinThicknessOrEpsilon, layerMask );
+            } else if ( collider is BoxCollider box) {
                 
-                Vector3 skinThicknessVector = new Vector3(skinThickness, skinThickness, skinThickness);
-                return Physics.BoxCast( box.transform.position, box.size - skinThicknessVector, direction, out hit, box.transform.rotation, 1f, layerMask );
-            }else{
+                Vector3 skinThicknessVector = new Vector3(skinThicknessOrEpsilon, skinThicknessOrEpsilon, skinThicknessOrEpsilon);
+                return Physics.BoxCast( box.transform.position + position + box.transform.rotation * box.center, (box.size - skinThicknessVector)/2f, direction.normalized, out hit, box.transform.rotation, direction.magnitude + skinThicknessOrEpsilon, layerMask );
+            } else {
                 hit = new RaycastHit();
                 return false;
             }
