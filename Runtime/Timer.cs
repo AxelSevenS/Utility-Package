@@ -4,12 +4,13 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+
 namespace SevenGame.Utility {
 
-    [System.Serializable]
+    [Serializable]
     public struct Timer {
         public float startTime;
-        public float duration => Time.unscaledTime - startTime;
+        public readonly float duration => Time.unscaledTime - startTime;
 
         public static implicit operator float(Timer timer) => timer.duration;
 
@@ -19,14 +20,14 @@ namespace SevenGame.Utility {
 
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TimeInterval {
         public float startTime;
         public float stopTime;
-        public bool isDone => Time.unscaledTime >= stopTime;
-        public float duration => stopTime - startTime;
-        public float remainingDuration => isDone ? 0f : stopTime - Time.unscaledTime;
-        public float progress => isDone ? 1f : (Time.unscaledTime - startTime) / duration;
+        public readonly bool isDone => Time.unscaledTime >= stopTime;
+        public readonly float duration => stopTime - startTime;
+        public readonly float remainingDuration => isDone ? 0f : stopTime - Time.unscaledTime;
+        public readonly float progress => isDone ? 1f : (Time.unscaledTime - startTime) / duration;
 
         public static implicit operator float(TimeInterval timeUntil) => timeUntil.remainingDuration;
 
@@ -40,10 +41,10 @@ namespace SevenGame.Utility {
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct ScaledTimer {
         public float startTime;
-        public float duration => Time.time - startTime;
+        public readonly float duration => Time.time - startTime;
 
         public static implicit operator float(ScaledTimer timer) => timer.duration;
 
@@ -53,14 +54,14 @@ namespace SevenGame.Utility {
 
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct ScaledTimeInterval {
         public float startTime;
         public float stopTime;
-        public bool isDone => Time.time >= stopTime;
-        public float duration => stopTime - startTime;
-        public float remainingDuration => isDone ? 0f : stopTime - Time.time;
-        public float progress => isDone ? 1f : (Time.time - startTime) / duration;
+        public readonly bool isDone => Time.time >= stopTime;
+        public readonly float duration => stopTime - startTime;
+        public readonly float remainingDuration => isDone ? 0f : stopTime - Time.time;
+        public readonly float progress => isDone ? 1f : (Time.time - startTime) / duration;
 
         public static implicit operator float(ScaledTimeInterval timeUntil) => timeUntil.remainingDuration;
 

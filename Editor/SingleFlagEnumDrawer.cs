@@ -4,19 +4,19 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace SevenGame.Utility.Editor {
+namespace SevenGame.Utility {
 	
-	[CustomPropertyDrawer(typeof(NotFlagEnumAttribute))]
-	public class NotFlagEnumDrawer : PropertyDrawer {
+	[CustomPropertyDrawer(typeof(SingleFlagEnumAttribute))]
+	public class SingleFlagEnumDrawer : PropertyDrawer {
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
 			if (property.propertyType != SerializedPropertyType.Enum) {
-				Debug.LogError("NotFlagEnumAttribute can only be used on enums");
+				Debug.LogError($"{nameof(SingleFlagEnumAttribute)} can only be used on enums");
 				return;
 			}
 
-			NotFlagEnumAttribute flagSettings = (NotFlagEnumAttribute)attribute;
+			SingleFlagEnumAttribute flagSettings = (SingleFlagEnumAttribute)attribute;
 			Enum targetEnum = (Enum)Enum.ToObject(fieldInfo.FieldType, property.intValue);
 
 			string propName = string.IsNullOrEmpty(flagSettings.displayName) ? ObjectNames.NicifyVariableName(property.name) : flagSettings.displayName;

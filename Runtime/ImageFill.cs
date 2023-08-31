@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace SevenGame.Utility {
 
     [RequireComponent(typeof(AspectRatioFitter))]
@@ -31,13 +32,13 @@ namespace SevenGame.Utility {
             float maxwidth = parentTransform.sizeDelta.x;
             float maxheight = parentTransform.sizeDelta.y;
             
-            if (height > width){ 
+            if (height > width) { 
                 ARF.aspectMode = AspectRatioFitter.AspectMode.WidthControlsHeight;
                 rectTransform.sizeDelta = new Vector2(maxwidth, rectTransform.sizeDelta.y);
-            }else if (height < width){
+            } else if (height < width) {
                 ARF.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
                 rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, maxheight);
-            }else{
+            } else {
                 ARF.aspectMode = AspectRatioFitter.AspectMode.None;
                 aspectRatio = 1f;
             }

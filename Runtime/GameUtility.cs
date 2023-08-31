@@ -13,8 +13,8 @@ namespace SevenGame.Utility {
 
 
         public static string Nicify(this string t){
-            
-            System.Text.StringBuilder result = new System.Text.StringBuilder("", t.Length);
+
+            StringBuilder result = new("", t.Length);
             const char spaceChar = ' ';
         
             for(int i = 0; i < t.Length; i++){

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    [System.Serializable]
+    [Serializable]
     public class SerializableStack<TValue> : ISerializationCallbackReceiver, IEnumerable, IEnumerable<TValue>, IReadOnlyCollection<TValue> {
 
         [SerializeField] private List<TValue> _values = new List<TValue>();
@@ -39,7 +39,7 @@ namespace SevenGame.Utility {
 
 
         public void CopyTo(TValue[] array, int arrayIndex) {
-            array = _stack.ToArray();
+            _stack.CopyTo(array, arrayIndex);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {

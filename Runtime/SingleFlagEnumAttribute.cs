@@ -13,13 +13,13 @@ namespace SevenGame.Utility {
 	/// </para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public class NotFlagEnumAttribute : PropertyAttribute {
+	public class SingleFlagEnumAttribute : PropertyAttribute {
 
 		public string displayName;
 
-		public NotFlagEnumAttribute() {}
+		public SingleFlagEnumAttribute() {}
 
-		public NotFlagEnumAttribute(string name) {
+		public SingleFlagEnumAttribute(string name) {
 			displayName = name;
 		}
 	}

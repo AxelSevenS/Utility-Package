@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEditor;
 using UnityEngine;
 
-namespace SevenGame.Utility.Editor {
+
+namespace SevenGame.Utility {
 
     [CustomPropertyDrawer(typeof( NormalVectorAttribute ), true)]
     public class NormalVectorDrawer : PropertyDrawer {

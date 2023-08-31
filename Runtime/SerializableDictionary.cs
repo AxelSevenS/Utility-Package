@@ -11,8 +11,8 @@ namespace SevenGame.Utility {
     [System.Serializable]
     public class SerializableDictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable, IDictionary<TKey, TValue> {
 
-        [SerializeField] private List<ValuePair<TKey, TValue>> _pairs = new List<ValuePair<TKey, TValue>>();
-        private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
+        [SerializeField] private List<ValuePair<TKey, TValue>> _pairs = new();
+        private Dictionary<TKey, TValue> _dictionary = new();
         
 
         public ICollection<TKey> Keys => _dictionary.Keys;
@@ -85,18 +85,18 @@ namespace SevenGame.Utility {
         
         public void OnBeforeSerialize() {
             _pairs.Clear();
-            foreach (var pair in _dictionary) {
-                _pairs.Add(new ValuePair<TKey, TValue>(pair.Key, pair.Value));
+            foreach (KeyValuePair<TKey, TValue> pair in _dictionary) {
+                _pairs.Add(new(pair.Key, pair.Value));
             }
         }
 
         public void OnAfterDeserialize() {
             _dictionary = new Dictionary<TKey, TValue>();
-            foreach (var pair in _pairs) {
+            foreach (ValuePair<TKey, TValue> pair in _pairs) {
                 try {
                     _dictionary.Add(pair.Key, pair.Value);
                 } catch (ArgumentException) {
-                    Debug.LogWarning($"Duplicate key {pair.Key} found in {this.GetType().Name}");
+                    Debug.LogWarning($"Duplicate key {pair.Key} found in {GetType().Name}");
                 }
             }
         }

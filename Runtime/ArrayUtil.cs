@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 namespace SevenGame.Utility {
 
     public static class ArrayUtil {

@@ -1,4 +1,4 @@
 using System.Runtime.CompilerServices;
 
 
-[assembly: InternalsVisibleToAttribute("Seven.Utility.Editor")]
+[assembly: InternalsVisibleTo("Seven.Utility.Editor")]

@@ -1,17 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 using UnityEngine;
 
 namespace SevenGame.Utility {
 
-    public interface ValueData<T> {
+    public interface IValueData<T> {
         void SetVal(T value);
     } 
 
-    [System.Serializable]
-    public struct Vector2Data : ValueData<Vector2> {
+    [Serializable]
+    public struct Vector2Data : IValueData<Vector2> {
 
         public Vector2 currentValue;
         public Vector2 lastValue;
@@ -19,11 +17,11 @@ namespace SevenGame.Utility {
         public Timer zeroTimer;
         public Timer nonZeroTimer;
 
-        public float x => currentValue.x;
-        public float y => currentValue.y;
-        public float sqrMagnitude => currentValue.sqrMagnitude;
-        public float magnitude => currentValue.magnitude;
-        public Vector2 normalized => currentValue.normalized;
+        public readonly float x => currentValue.x;
+        public readonly float y => currentValue.y;
+        public readonly float sqrMagnitude => currentValue.sqrMagnitude;
+        public readonly float magnitude => currentValue.magnitude;
+        public readonly Vector2 normalized => currentValue.normalized;
 
         public static implicit operator Vector2(Vector2Data data) => data.currentValue;
         public static Vector2 operator *(Vector2Data a, float b) => a.currentValue * b;
@@ -38,8 +36,8 @@ namespace SevenGame.Utility {
         }
     }
 
-    [System.Serializable]
-    public struct Vector3Data : ValueData<Vector3> {
+    [Serializable]
+    public struct Vector3Data : IValueData<Vector3> {
 
         public Vector3 currentValue;
         public Vector3 lastValue;
@@ -47,12 +45,12 @@ namespace SevenGame.Utility {
         public Timer zeroTimer;
         public Timer nonZeroTimer;
 
-        public float x => currentValue.x;
-        public float y => currentValue.y;
-        public float z => currentValue.z;
-        public float sqrMagnitude => currentValue.sqrMagnitude;
-        public float magnitude => currentValue.magnitude;
-        public Vector3 normalized => currentValue.normalized;
+        public readonly float x => currentValue.x;
+        public readonly float y => currentValue.y;
+        public readonly float z => currentValue.z;
+        public readonly float sqrMagnitude => currentValue.sqrMagnitude;
+        public readonly float magnitude => currentValue.magnitude;
+        public readonly Vector3 normalized => currentValue.normalized;
 
         public static implicit operator Vector3(Vector3Data data) => data.currentValue;
         public static Vector3 operator *(Vector3Data a, float b) => a.currentValue * b;
@@ -67,15 +65,15 @@ namespace SevenGame.Utility {
         }
     }
 
-    [System.Serializable]
-    public struct QuaternionData : ValueData<Quaternion> {
+    [Serializable]
+    public struct QuaternionData : IValueData<Quaternion> {
         public Quaternion currentValue;
         public Quaternion lastValue;
         
-        public float x => currentValue.x;
-        public float y => currentValue.y;
-        public float z => currentValue.z;
-        public float w => currentValue.w;
+        public readonly float x => currentValue.x;
+        public readonly float y => currentValue.y;
+        public readonly float z => currentValue.z;
+        public readonly float w => currentValue.w;
 
         public void SetVal(Quaternion value){
             lastValue = currentValue;
@@ -89,12 +87,12 @@ namespace SevenGame.Utility {
         
     }
     
-    [System.Serializable]
-    public struct BoolData : ValueData<bool> {
+    [Serializable]
+    public struct BoolData : IValueData<bool> {
         public bool currentValue;
         public bool lastValue;
-        public bool started => currentValue && !lastValue;
-        public bool stopped => !currentValue && lastValue;
+        public readonly bool Started => currentValue && !lastValue;
+        public readonly bool Stopped => !currentValue && lastValue;
 
         public Timer trueTimer;
         public Timer falseTimer;
@@ -109,16 +107,16 @@ namespace SevenGame.Utility {
         }
     }
 
-    [System.Serializable]
-    public struct KeyInputData : ValueData<bool> {
+    [Serializable]
+    public struct KeyInputData : IValueData<bool> {
 
         private const float HOLD_TIME = 0.15f;
 
 
         public bool currentValue;
         public bool lastValue;
-        public bool started => currentValue && !lastValue;
-        public bool stopped => !currentValue && lastValue;
+        public readonly bool Started => currentValue && !lastValue;
+        public readonly bool Stopped => !currentValue && lastValue;
 
         public Timer trueTimer;
         public Timer falseTimer;
@@ -126,16 +124,16 @@ namespace SevenGame.Utility {
         public static implicit operator bool(KeyInputData data) => data.currentValue;
 
 
-        public bool Tapped(float time = HOLD_TIME) => stopped && trueTimer < time;
-        public bool Held(float time = HOLD_TIME) => currentValue && trueTimer > time;
+        public readonly bool Tapped(float time = HOLD_TIME) => Stopped && trueTimer < time;
+        public readonly bool Held(float time = HOLD_TIME) => currentValue && trueTimer > time;
 
         public static bool SimultaneousTap(KeyInputData a, KeyInputData b, float time = HOLD_TIME) {
-            bool aTapped = a.trueTimer < time && b.started;
-            bool bTapped = b.trueTimer < time && a.started;
+            bool aTapped = a.trueTimer < time && b.Started;
+            bool bTapped = b.trueTimer < time && a.Started;
             return aTapped || bTapped;
         }
 
-        public bool SimultaneousTap(KeyInputData other, float time = HOLD_TIME) {
+        public readonly bool SimultaneousTap(KeyInputData other, float time = HOLD_TIME) {
             return SimultaneousTap(this, other, time);
         }
         

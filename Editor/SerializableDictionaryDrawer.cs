@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEditorInternal;
 
 
-namespace SevenGame.Utility.Editor {
+namespace SevenGame.Utility {
 
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
     public class SerializableDictionaryDrawer : PropertyDrawer {

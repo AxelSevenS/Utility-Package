@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using System.Reflection;
 
-namespace SevenGame.Utility.Editor {
+namespace SevenGame.Utility {
 
     public class SevenEditorUtility {
         
