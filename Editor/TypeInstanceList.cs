@@ -1,3 +1,5 @@
+#if USE_URP_CORE
+
 using System;
 using System.Reflection;
 using System.Linq;
@@ -275,3 +277,5 @@ namespace SevenGame.Utility {
         }
     }
 }
+
+#endif

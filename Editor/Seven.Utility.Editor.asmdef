@@ -1,6 +1,6 @@
 {
     "name": "Seven.Utility.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "SevenGame.Utility",
     "references": [
         "GUID:b1ccec69488d4e947915cab0ea83be19",
         "GUID:df380645f10b7bc4b97d4f5eb6303d95",
@@ -15,6 +15,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.core",
+            "expression": "",
+            "define": "USE_URP_CORE"
+        }
+    ],
     "noEngineReferences": false
 }

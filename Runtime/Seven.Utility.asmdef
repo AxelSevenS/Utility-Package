@@ -1,7 +1,10 @@
 {
     "name": "Seven.Utility",
-    "rootNamespace": "",
-    "references": [],
+    "rootNamespace": "SevenGame.Utility",
+    "references": [
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:84651a3751eca9349aac36a66bba901b"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -9,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.localization",
+            "expression": "",
+            "define": "USE_LOCALIZATION"
+        }
+    ],
     "noEngineReferences": false
 }
