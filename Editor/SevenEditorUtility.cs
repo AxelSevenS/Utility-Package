@@ -1,14 +1,14 @@
 using System;
-
-using UnityEngine;
-using UnityEditor;
 using System.Text.RegularExpressions;
 using System.Collections;
 using System.Reflection;
 
+using UnityEngine;
+using UnityEditor;
+
 namespace SevenGame.Utility {
 
-    public class SevenEditorUtility {
+    public static class SevenEditorUtility {
         
         public static void ResetValue(SerializedProperty property) {
 			if (property == null)
@@ -40,16 +40,16 @@ namespace SevenGame.Utility {
 					property.enumValueIndex = 0;
 					break;
 				case SerializedPropertyType.Vector2:
-					property.vector2Value = default(Vector2);
+					property.vector2Value = default;
 					break;
 				case SerializedPropertyType.Vector3:
-					property.vector3Value = default(Vector3);
+					property.vector3Value = default;
 					break;
 				case SerializedPropertyType.Vector4:
-					property.vector4Value = default(Vector4);
+					property.vector4Value = default;
 					break;
 				case SerializedPropertyType.Rect:
-					property.rectValue = default(Rect);
+					property.rectValue = default;
 					break;
 				case SerializedPropertyType.ArraySize:
 					property.intValue = 0;
@@ -61,7 +61,7 @@ namespace SevenGame.Utility {
 					property.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 					break;
 				case SerializedPropertyType.Bounds:
-					property.boundsValue = default(Bounds);
+					property.boundsValue = default;
 					break;
 				case SerializedPropertyType.Gradient:
 					//!TODO: Amend when Unity add a public API for setting the gradient.
@@ -76,16 +76,16 @@ namespace SevenGame.Utility {
                     property.intValue = 0;
                     break;
                 case SerializedPropertyType.Vector2Int:
-                    property.vector2IntValue = default(Vector2Int);
+                    property.vector2IntValue = default;
                     break;
                 case SerializedPropertyType.Vector3Int:
-                    property.vector3IntValue = default(Vector3Int);
+                    property.vector3IntValue = default;
                     break;
                 case SerializedPropertyType.RectInt:
-                    property.rectIntValue = default(RectInt);
+                    property.rectIntValue = default;
                     break;
                 case SerializedPropertyType.BoundsInt:
-                    property.boundsIntValue = default(BoundsInt);
+                    property.boundsIntValue = default;
                     break;
                 case SerializedPropertyType.ManagedReference:
                     property.managedReferenceValue = null;
@@ -103,7 +103,7 @@ namespace SevenGame.Utility {
 			if (!element.hasChildren)
 				return;
 
-			var childProperty = element.Copy();
+			SerializedProperty childProperty = element.Copy();
 			int elementPropertyDepth = element.depth;
 			bool enterChildren = true;
 
@@ -120,7 +120,7 @@ namespace SevenGame.Utility {
             string path = prop.propertyPath;
         
             object propertyObject = serializedObject == null || serializedObject.targetObject == null ? null : serializedObject.targetObject;
-            System.Type objectType = propertyObject == null ? null : propertyObject.GetType();
+            Type objectType = propertyObject == null ? null : propertyObject.GetType();
             
             if (!string.IsNullOrEmpty(path) && propertyObject != null) {
                 string[] splitPath = path.Split('.');
@@ -139,18 +139,16 @@ namespace SevenGame.Utility {
                         pathNode = splitPath[++i];
 
                         //match the `data[0]` part of the path and extract the IList item index
-                        Regex matchArrayElement = new Regex(@"^data\[(\d+)\]$");
+                        Regex matchArrayElement = new(@"^data\[(\d+)\]$");
                         Match elementMatch = matchArrayElement.Match(pathNode);
-                        int index;
-                        if (elementMatch.Success && int.TryParse(elementMatch.Groups[1].Value, out index)) {
+                        if (elementMatch.Success && int.TryParse(elementMatch.Groups[1].Value, out int index)) {
                             IList objectArray = (IList)propertyObject;
                             bool validArrayEntry = objectArray != null && index < objectArray.Count;
                             propertyObject = validArrayEntry ? objectArray[index] : null;
                             objectType = fieldType.IsArray
                                 ? fieldType.GetElementType()          //only set for arrays
                                 : fieldType.GenericTypeArguments[0];  //type of `T` in List<T>
-                        }
-                        else {
+                        } else {
                             Debug.LogErrorFormat(serializedObject.targetObject, "Unexpected path format for array item: '{0}'", pathNode);
                         }
                         //reset fieldType, so we don't end up in the IList branch again next iteration
@@ -173,7 +171,7 @@ namespace SevenGame.Utility {
 
                         //store object info for next iteration or to return
                         propertyObject = field == null || propertyObject == null ? null : field.GetValue(propertyObject);
-                        fieldType = field == null ? null : field.FieldType;
+                        fieldType = field?.FieldType;
                         objectType = fieldType;
                     }
                 }
@@ -211,15 +209,13 @@ namespace SevenGame.Utility {
                         pathNode = splitPath[++i];
 
                         //match the `data[0]` part of the path and extract the IList item index
-                        Regex matchArrayElement = new Regex(@"^data\[(\d+)\]$");
+                        Regex matchArrayElement = new(@"^data\[(\d+)\]$");
                         Match elementMatch = matchArrayElement.Match(pathNode);
-                        int index;
-                        if (elementMatch.Success && int.TryParse(elementMatch.Groups[1].Value, out index)) {
+                        if (elementMatch.Success && int.TryParse(elementMatch.Groups[1].Value, out int index)) {
                             IList objectArray = (IList)TObject;
                             bool validArrayEntry = objectArray != null && index < objectArray.Count;
                             TObject = validArrayEntry ? (T)objectArray[index] : null;
-                        }
-                        else {
+                        } else {
                             Debug.LogErrorFormat(serializedObject.targetObject, "Unexpected path format for array item: '{0}'", pathNode);
                         }
                         //reset fieldType, so we don't end up in the IList branch again next iteration
@@ -242,12 +238,29 @@ namespace SevenGame.Utility {
 
                         //store object info for next iteration or to return
                         TObject = field == null || TObject == null ? null : (T)field.GetValue(TObject);
-                        fieldType = field == null ? null : field.FieldType;
+                        fieldType = field?.FieldType;
                     }
                 }
             }
             
             return TObject;
+        }
+
+        public static T GetPropertyValue<T>(this Type type, string name) {
+            if (type == null) return default;
+
+            BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
+
+            PropertyInfo info = type.GetProperty(name, flags);
+
+            if (info == null) {
+                FieldInfo fieldInfo = type.GetField(name, flags);
+                if (fieldInfo == null) return default;
+
+                return (T)fieldInfo.GetValue(null);
+            }
+
+            return (T)info.GetValue(null, null);
         }
     }
 }

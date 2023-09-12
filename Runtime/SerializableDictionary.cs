@@ -71,7 +71,7 @@ namespace SevenGame.Utility {
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) {
-            array = _dictionary.ToArray();
+            ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {

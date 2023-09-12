@@ -13,8 +13,8 @@ namespace SevenGame.Utility {
             EditorGUI.BeginProperty( position, label, property );
 
             float halfWidth = position.width/2f;
-            Rect leftRect = new Rect(position.x - 2f, position.y, halfWidth, position.height);
-            Rect rightRect = new Rect(position.x + halfWidth, position.y, halfWidth, position.height);
+            Rect leftRect = new(position.x - 2f, position.y, halfWidth, position.height);
+            Rect rightRect = new(position.x + halfWidth, position.y, halfWidth, position.height);
 
             EditorGUI.PropertyField( leftRect, property.FindPropertyRelative( "Key" ), GUIContent.none );
             EditorGUI.PropertyField( rightRect, property.FindPropertyRelative( "Value" ), GUIContent.none );

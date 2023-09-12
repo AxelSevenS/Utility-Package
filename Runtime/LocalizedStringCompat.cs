@@ -16,9 +16,9 @@ namespace SevenGame.Utility {
     [Serializable]
     public struct LocalizedStringCompat {
 
-        private bool _useLocalization;
-        private string _value;
-        private LocalizedString _localizedValue;
+        [SerializeField] private bool _useLocalization;
+        [SerializeField] private string _value;
+        [SerializeField] private LocalizedString _localizedValue;
 
         public LocalizedStringCompat(string value) {
             _value = value;
@@ -32,7 +32,7 @@ namespace SevenGame.Utility {
             _useLocalization = true;
         }
 
-        public void GetValue(Action<string> callback) {
+        public readonly void GetValue(Action<string> callback) {
             if (_useLocalization) {
                 AsyncOperationHandle<string> handle = _localizedValue.GetLocalizedStringAsync();
                 handle.Completed += (AsyncOperationHandle<string> result) => {

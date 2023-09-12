@@ -11,8 +11,8 @@ namespace SevenGame.Utility {
     [Serializable]
     public class SerializableStack<TValue> : ISerializationCallbackReceiver, IEnumerable, IEnumerable<TValue>, IReadOnlyCollection<TValue> {
 
-        [SerializeField] private List<TValue> _values = new List<TValue>();
-        private Stack<TValue> _stack = new Stack<TValue>();
+        [SerializeField] private List<TValue> _values = new();
+        private Stack<TValue> _stack = new();
 
         public int Count => _stack.Count;
         
@@ -81,14 +81,14 @@ namespace SevenGame.Utility {
         
         public void OnBeforeSerialize() {
             _values.Clear();
-            foreach (var pair in _stack) {
+            foreach (TValue pair in _stack) {
                 _values.Insert(0, pair);
             }
         }
 
         public void OnAfterDeserialize() {
             _stack = new Stack<TValue>();
-            foreach (var stackValue in _values) {
+            foreach (TValue stackValue in _values) {
                 _stack.Push(stackValue);
             }
         }

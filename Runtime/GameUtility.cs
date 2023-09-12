@@ -1,67 +1,39 @@
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using UnityEngine;
 
 namespace SevenGame.Utility {
 
     public static class GameUtility {
-        
-        public static float timeDelta => Time.inFixedTimeStep ? Time.fixedDeltaTime : Time.deltaTime;
-        public static float timeUnscaledDelta => Time.inFixedTimeStep ? Time.fixedUnscaledDeltaTime : Time.unscaledDeltaTime;
 
-
-        public static string Nicify(this string t){
-
-            StringBuilder result = new("", t.Length);
-            const char spaceChar = ' ';
-        
-            for(int i = 0; i < t.Length; i++){
-                if(char.IsUpper(t[i]) == true && i != 0){
-                    result.Append(spaceChar);
-                }
-                result.Append(t[i]);
-            }
-            return result.ToString();
-        }
-
-        public static string[] UppercaseSplit(this string t){
-            return Regex.Split(t, @"(?<!^)(?=[A-Z])");
-        }
-
-        public static T SafeDestroy<T>(T obj) where T : Object{
-            if (!Application.isPlaying)
-                Object.DestroyImmediate(obj);
-            else
+        public static T SafeDestroy<T>(this T obj) where T : Object {
+            #if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    Object.DestroyImmediate(obj);
+                else
+            #endif
                 Object.Destroy(obj);
             
             return null;
+        }
+
+        public static void SafeDestroy<T>(ref T obj) where T : Object {
+            #if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    Object.DestroyImmediate(obj);
+                else
+            #endif
+                Object.Destroy(obj);
+            
+            obj = null;
         }
         
         public static void SetLayerRecursively(this GameObject gameObject, int newLayer) {
             gameObject.layer = newLayer;
         
             foreach ( Transform child in gameObject.transform ) {
-                SetLayerRecursively( child.gameObject, newLayer );
+                child.gameObject.SetLayerRecursively( newLayer );
             }
-        }
-
-        public static T GetPropertyValue<T>(this System.Type type, string name) {
-            if (type == null) return default(T);
-
-            BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
-
-            PropertyInfo info = type.GetProperty(name, flags);
-
-            if (info == null) {
-                FieldInfo fieldInfo = type.GetField(name, flags);
-                if (fieldInfo == null) return default(T);
-
-                return (T)fieldInfo.GetValue(null);
-            }
-
-            return (T)info.GetValue(null, null);
         }
 
     }

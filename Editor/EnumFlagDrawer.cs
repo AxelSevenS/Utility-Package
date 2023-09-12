@@ -16,10 +16,10 @@ namespace SevenGame.Utility {
 				return;
 			}
 
-			EnumFlagAttribute flagSettings = (EnumFlagAttribute)attribute;
-			Enum targetEnum = (Enum)Enum.ToObject(fieldInfo.FieldType, property.intValue);
+			// EnumFlagAttribute flagSettings = (EnumFlagAttribute)attribute;
+			// Enum targetEnum = (Enum)Enum.ToObject(fieldInfo.FieldType, property.intValue);
 
-			string propName = string.IsNullOrEmpty(flagSettings.displayName) ? ObjectNames.NicifyVariableName(property.name) : flagSettings.displayName;
+			// string propName = string.IsNullOrEmpty(flagSettings.displayName) ? ObjectNames.NicifyVariableName(property.name) : flagSettings.displayName;
 
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.BeginProperty(position, label, property);

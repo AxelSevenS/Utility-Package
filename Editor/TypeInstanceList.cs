@@ -2,8 +2,6 @@
 
 using System;
 using System.Reflection;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -15,7 +13,7 @@ using Object = UnityEngine.Object;
 
 namespace SevenGame.Utility {
 
-    public abstract class TypeInstanceList<T, TEditor> where T : class, IDisposable where TEditor : UnityEditor.Editor {
+    public abstract class TypeInstanceList<T, TEditor> where T : class, IDisposable where TEditor : Editor {
 
         public abstract GUIContent RenderFeaturesGUI {get;}
         public abstract GUIContent MissingFeatureGUI {get;}
@@ -118,16 +116,16 @@ namespace SevenGame.Utility {
             editor.serializedObject.ApplyModifiedProperties();
         }
 
-        private void RemoveInstance(int id) {
-            SerializedProperty property = soInstances.GetArrayElementAtIndex(id);
+        private void RemoveInstance(int index) {
+            SerializedProperty property = soInstances.GetArrayElementAtIndex(index);
             Object component = property.objectReferenceValue;
             property.objectReferenceValue = null;
 
             Undo.SetCurrentGroupName(component == null ? "Remove Renderer Feature" : $"Remove {component.name}");
 
             // remove the array index itself from the list
-            soInstances.DeleteArrayElementAtIndex(id);
-            soInstanceGUIDs.DeleteArrayElementAtIndex(id);
+            soInstances.DeleteArrayElementAtIndex(index);
+            soInstanceGUIDs.DeleteArrayElementAtIndex(index);
             UpdateEditorList();
             editor.serializedObject.ApplyModifiedProperties();
 
@@ -266,7 +264,7 @@ namespace SevenGame.Utility {
             }
             EditorGUILayout.Space();
 
-            //Add renderer
+            // "Add instance" button
             using (var hscope = new EditorGUILayout.HorizontalScope()) {
                 if (GUILayout.Button(AddInstanceGUI, EditorStyles.miniButton)) {
                     var r = hscope.rect;
